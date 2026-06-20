@@ -36,6 +36,11 @@ import { buildExplain, type ExplainPayload } from './lib/explain'
 
 const CLIENT = { name: 'Felix', initial: 'F' }
 
+// Backend connection — proxied to the Flask API (see vite.config.ts).
+// Felix is the demo client; his signals surface on Anna's RM Radar dashboard.
+const API = '/api/v1'
+const FELIX_UUID = 'nqhw1mq98wkdiznouvgcjx5v420gninp'
+
 /** Skins rotated through for freshly-recorded memos. */
 const MEMO_SKINS: SkinKey[] = ['ocean', 'petrol', 'indigo', 'steel', 'navy']
 
@@ -86,6 +91,16 @@ export default function App() {
   useEffect(() => {
     const t = setTimeout(() => setIntro(false), 2550)
     return () => clearTimeout(t)
+  }, [])
+
+  // Sign Felix in once so his signals carry the auth cookie to the backend.
+  useEffect(() => {
+    fetch(`${API}/users/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'felix.urban', password: 'demo1234' }),
+      credentials: 'include',
+    }).catch(() => {})
   }, [])
 
   const drill = (child: AssetNode) => {
@@ -205,9 +220,38 @@ export default function App() {
     }, 220)
   }
 
-  const askSent = () => {
+  // Sending to Clara fires the real AI pipeline: it lands on Anna's RM Radar
+  // dashboard as a pending opportunity, and her brief comes straight back here.
+  const askSent = async () => {
+    const ctx = askContext
     setAskContext(null)
-    showToast('Sent to Clara')
+    if (!ctx) return
+
+    showToast('Signal AI is briefing Clara…')
+    try {
+      const res = await fetch(`${API}/signals/reel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caption: ctx, client_uuid: FELIX_UUID }),
+        credentials: 'include',
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const card = data.client_card ?? {}
+        setExplain({
+          source: 'yap',
+          contextLabel: ctx,
+          brief: card.body ?? 'Clara has reviewed your note and will follow up shortly.',
+          assessment: 'neutral',
+          suggestionTitle: card.headline ?? 'Clara will follow up',
+        })
+        showToast('Clara has reviewed your note ✓')
+      } else {
+        showToast('Sent to Clara')
+      }
+    } catch {
+      showToast('Sent to Clara')
+    }
   }
 
   return (
