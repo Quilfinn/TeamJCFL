@@ -159,22 +159,58 @@ body {
   }
 }
 
-/* Greeting intro — transform-only (safe) with an overshoot for life */
+/* Entrance — transform-only (safe), smooth expo ease */
 @keyframes introUp {
   from {
-    transform: translateY(20px) scale(0.94);
+    transform: translateY(16px);
   }
   to {
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 @keyframes introPop {
   from {
-    transform: scale(0.3) rotate(-12deg);
+    transform: scale(0.5);
   }
   to {
-    transform: scale(1) rotate(0);
+    transform: scale(1);
   }
+}
+
+/* AI orb */
+@keyframes orbFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes orbGlow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
+}
+
+/* Smooth section collapse (grid-rows trick) */
+.collapsible {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.collapsible[data-open='false'] {
+  grid-template-rows: 0fr;
+}
+.collapsible > .collapsible-inner {
+  overflow: hidden;
+  min-height: 0;
 }
 
 /* Slide a full page in from the right */
@@ -184,6 +220,12 @@ body {
   }
   to {
     transform: translateX(0);
+  }
+}
+
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
   }
 }
 

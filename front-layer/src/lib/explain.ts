@@ -1,38 +1,33 @@
 import type { FeedItem, RelatedAsset, Source } from '../data/feed'
 
+export type Assessment = 'positive' | 'neutral' | 'negative'
+
 export interface ExplainPayload {
   source: Source | 'yap'
   contextLabel: string
   handle?: string
   brief: string
-  points: string[]
+  /** drives which actions (and whether a chart) are shown */
+  assessment: Assessment
   related?: RelatedAsset[]
   suggestionTitle: string
-  suggestionMeta?: string
 }
 
-const REEL_BRIEFS: Record<string, Omit<ExplainPayload, 'source' | 'contextLabel' | 'handle' | 'related'>> = {
+const REEL_BRIEFS: Record<
+  string,
+  Omit<ExplainPayload, 'source' | 'contextLabel' | 'handle' | 'related'>
+> = {
   r1: {
+    assessment: 'positive',
     brief:
-      'The clip argues that real interest rates are rolling over while central banks keep buying bullion — historically a strong tailwind for gold. The thesis is directionally sound, but it skips the risk: a hot inflation print could snap the trade.',
-    points: [
-      'You already hold CHF 96K in gold-linked names — roughly 2.2% of the book.',
-      'A move to a 4–5% hedge is defensible given your risk profile.',
-      'Concentration risk is low; this fits as a diversifier, not a core bet.',
-    ],
+      'Real rates are rolling over while central banks keep buying bullion — historically a strong tailwind for gold. The thesis is sound, and a small hedge fits your book cleanly.',
     suggestionTitle: 'Add 2% to your gold hedge',
-    suggestionMeta: '~CHF 86’000',
   },
   r2: {
+    assessment: 'negative',
     brief:
-      'The reel maps the 2026 AI capex cycle to the names that capture the spend — compute, foundry and power/cooling. The picks are reasonable, but most are already priced for perfection.',
-    points: [
-      'Your tech & growth sleeve is CHF 712K — already 17% of the book.',
-      'Adding here raises concentration; consider the power/cooling angle instead.',
-      'Vertiv is the contrarian read — down today, but levered to the same theme.',
-    ],
-    suggestionTitle: 'Tilt 1% toward AI power & cooling',
-    suggestionMeta: '~CHF 43’000',
+      'The AI-capex names are reasonable, but they’re already priced for perfection and your tech sleeve is heavy at 17%. I wouldn’t add here without a human gut-check.',
+    suggestionTitle: 'Talk it through before adding tech',
   },
 }
 
@@ -50,14 +45,10 @@ export function buildExplain(item: FeedItem): ExplainPayload {
   return {
     source: 'yap',
     contextLabel: item.body,
+    assessment: 'neutral',
     brief:
-      'Signal AI read your memo and checked it against your current allocation. The instinct holds up — here is the context before you raise it with Clara.',
-    points: [
-      'Emerging markets are 4.6% of the book; trimming to ~3% is well inside your mandate.',
-      'Swiss quality lowers volatility without giving up much expected return.',
-      'No tax event triggered at this size — clean to execute.',
-    ],
-    suggestionTitle: 'Draft the rotation for Clara to review',
-    suggestionMeta: 'EM → Swiss quality',
+      'I checked your memo against the book. Trimming EM into Swiss quality is well inside your mandate and triggers no tax event — reasonable to stage with an alert.',
+    related: [{ ticker: 'EWJ', name: 'EM / Japan', change: -1.32 }],
+    suggestionTitle: 'Stage the EM → Swiss rotation',
   }
 }

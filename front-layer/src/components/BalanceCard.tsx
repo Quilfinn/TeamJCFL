@@ -1,5 +1,6 @@
 import { ArrowUpRight } from 'lucide-react'
 import { RollingNumber } from './RollingNumber'
+import baerLogo from '../assets/baer.png'
 import type { AssetNode } from '../data/portfolio'
 
 const groupCHF = new Intl.NumberFormat('de-CH', { maximumFractionDigits: 0 })
@@ -38,10 +39,12 @@ export function BalanceCard({ node, atRoot, pct, delta, periodLabel }: Props) {
       <div className="relative flex flex-1 flex-col justify-between p-5">
         {/* top: logo + balance */}
         <div className="flex items-start justify-between">
-          <div className="relative h-9 w-[54px]" aria-hidden>
-            <span className="absolute top-0 left-0 h-9 w-9 rounded-full bg-white/25" />
-            <span className="absolute top-0 left-[18px] h-9 w-9 rounded-full bg-white/40" />
-          </div>
+          <img
+            src={baerLogo}
+            alt="Julius Baer"
+            className="h-8 w-auto"
+            style={{ filter: 'brightness(0) invert(1)', opacity: 0.95 }}
+          />
 
           <div className="text-right">
             <div className="flex items-start justify-end gap-1.5">
@@ -64,7 +67,7 @@ export function BalanceCard({ node, atRoot, pct, delta, periodLabel }: Props) {
         <div className="flex items-end justify-between">
           <div className="leading-tight">
             <div className="text-[16px] font-medium text-white">Premium banking</div>
-            <div className="text-[12.5px] font-medium text-white/50">Julius Baer · private wealth</div>
+            <div className="text-[12.5px] font-medium text-white/50">Julius Baer</div>
           </div>
 
           <div className="text-right">
