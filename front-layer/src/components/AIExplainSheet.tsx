@@ -51,7 +51,7 @@ export function AIExplainSheet({ payload, onClose, onAsk, onConfirm, onResearch 
             <div className="flex items-center gap-2.5">
               <AIOrb size={36} float={false} />
               <div className="leading-tight">
-                <div className="text-[15px] font-semibold text-ink">Signal AI</div>
+                <div className="text-[15px] font-semibold text-ink">Orbit</div>
                 <div className="text-[11.5px] font-medium text-ink-faint">
                   {payload.source === 'yap' ? 'On your memo' : 'On this reel'}
                 </div>

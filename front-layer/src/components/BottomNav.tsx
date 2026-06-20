@@ -9,7 +9,10 @@ interface Props {
 
 export function BottomNav({ active = 'home', onChange, onMicDown }: Props) {
   return (
-    <div className="flex justify-center px-5 pb-7 pt-2">
+    <div
+      className="flex justify-center px-5 pb-7 pt-2"
+      style={{ animation: 'introUp 0.85s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '1.95s' }}
+    >
       <div
         className="flex items-center gap-7 rounded-full px-6 py-2.5"
         style={{

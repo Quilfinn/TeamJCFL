@@ -1,32 +1,43 @@
 import { useEffect, useRef, useState } from 'react'
+import { ChevronRight } from 'lucide-react'
 import { PhoneFrame } from './components/PhoneFrame'
 import { BottomNav } from './components/BottomNav'
 import { Greeting } from './components/Greeting'
 import { BalanceCard } from './components/BalanceCard'
-import { Breadcrumb } from './components/Breadcrumb'
+import { Section } from './components/Section'
 import { Treemap } from './components/Treemap'
 import { Timeframes, TIMEFRAMES } from './components/Timeframes'
-import { ActivityRow } from './components/ActivityRow'
-import { QuickActionsDrawer } from './components/QuickActionsDrawer'
+import { ActivityDeck } from './components/ActivityDeck'
+import { Folders } from './components/Folders'
+import { FolderSheet } from './components/FolderSheet'
+import { MoveSheet } from './components/MoveSheet'
+import { CreateFolderSheet } from './components/CreateFolderSheet'
 import { RecordingDrawer } from './components/RecordingDrawer'
 import { AIExplainSheet } from './components/AIExplainSheet'
+import { ResearchSheet } from './components/ResearchSheet'
 import { ForwardSheet } from './components/ForwardSheet'
 import { AdvisorPage } from './components/AdvisorPage'
+import { IntroSplash } from './components/IntroSplash'
 import { Toast } from './components/Toast'
 import { portfolio, type AssetNode } from './data/portfolio'
 import {
   feed as initialFeed,
+  initialFolders,
+  FOLDER_SKINS,
   sampleTranscripts,
+  watchlist,
   type FeedItem,
   type YapItem,
-  type RMNudgeItem,
+  type RelatedAsset,
+  type SkinKey,
+  type Folder,
 } from './data/feed'
 import { buildExplain, type ExplainPayload } from './lib/explain'
 
 const CLIENT = { name: 'Felix', initial: 'F' }
 
-const API = '/api/v1'
-const FELIX_UUID = 'nqhw1mq98wkdiznouvgcjx5v420gninp'
+/** Skins rotated through for freshly-recorded memos. */
+const MEMO_SKINS: SkinKey[] = ['ocean', 'petrol', 'indigo', 'steel', 'navy']
 
 let seq = 0
 
@@ -42,13 +53,40 @@ export default function App() {
   const delta = (current.value * pct) / 100
 
   const [feed, setFeed] = useState<FeedItem[]>(initialFeed)
-  const [drawer, setDrawer] = useState<{ item: FeedItem; fresh: boolean } | null>(null)
+  const [folders, setFolders] = useState<Folder[]>(initialFolders)
+  const [openFolder, setOpenFolder] = useState<string | null>(null)
+  const [moveItem, setMoveItem] = useState<FeedItem | null>(null)
+  const [creating, setCreating] = useState<{ item: FeedItem | null } | null>(null)
+  const [freshId, setFreshId] = useState<string | null>(null)
+  const [leavingId, setLeavingId] = useState<string | null>(null)
+
+  // the stack holds anything not yet filed; folders are managed by hand
+  const stackItems = feed.filter((i) => i.status === 'new')
+  const itemsIn = (name: string) => feed.filter((i) => i.status === 'filed' && i.topic === name)
+  const foldersData = folders.map((f) => ({ ...f, items: itemsIn(f.name) }))
+  const openFolderData = (() => {
+    const f = folders.find((x) => x.name === openFolder)
+    return f ? { ...f, items: itemsIn(f.name) } : null
+  })()
+
   const [recording, setRecording] = useState(false)
+  const [recPhase, setRecPhase] = useState<'listening' | 'processing'>('listening')
   const [explain, setExplain] = useState<ExplainPayload | null>(null)
+  const [stockSheet, setStockSheet] = useState<{
+    assets: RelatedAsset[]
+    title: string
+    subtitle: string
+  } | null>(null)
   const [askContext, setAskContext] = useState<string | null>(null)
   const [advisorOpen, setAdvisorOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [intro, setIntro] = useState(true)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    const t = setTimeout(() => setIntro(false), 2550)
+    return () => clearTimeout(t)
+  }, [])
 
   const drill = (child: AssetNode) => {
     if (child.children?.length) setPath((p) => [...p, child])
@@ -66,89 +104,110 @@ export default function App() {
     }
   }, [])
 
-  useEffect(() => {
-    fetch(`${API}/users/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: 'felix.urban', password: 'demo1234' }),
-      credentials: 'include',
-    }).catch(() => {})
-  }, [])
-
-  const openItem = (item: FeedItem) => setDrawer({ item, fresh: false })
-
+  // open the AI explainer for an item
   const doExplain = (item: FeedItem) => {
-    setDrawer(null)
     setExplain(buildExplain(item))
   }
   const doSendRM = (item: FeedItem) => {
-    if (item.kind === 'rm_nudge') return
-    setDrawer(null)
+    setExplain(null)
     setAskContext(item.kind === 'reel' ? item.caption : item.body)
   }
+  // animate a stack card off to the right, then run the state change
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const exitThen = (id: string, fn: () => void) => {
+    setLeavingId(id)
+    if (leaveTimer.current) clearTimeout(leaveTimer.current)
+    leaveTimer.current = setTimeout(() => {
+      fn()
+      setLeavingId(null)
+    }, 330)
+  }
+
   const doDelete = (item: FeedItem) => {
-    setFeed((f) => f.filter((x) => x.id !== item.id))
-    setDrawer(null)
-    showToast('Removed from your activity')
+    exitThen(item.id, () => {
+      setFeed((f) => f.filter((x) => x.id !== item.id))
+      showToast('Removed from your activity')
+    })
+  }
+  // filing is now by hand — open the folder picker
+  const doFile = (item: FeedItem) => setMoveItem(item)
+
+  const fileInto = (item: FeedItem, name: string) => {
+    setMoveItem(null)
+    exitThen(item.id, () => {
+      setFeed((f) => f.map((x) => (x.id === item.id ? ({ ...x, status: 'filed', topic: name } as FeedItem) : x)))
+      showToast(`Moved to ${name}`)
+    })
+  }
+  const unfile = (item: FeedItem) => {
+    setFeed((f) => f.map((x) => (x.id === item.id ? ({ ...x, status: 'new', topic: '' } as FeedItem) : x)))
+    showToast('Moved back to your stack')
+  }
+  const createFolder = (name: string) => {
+    const forItem = creating?.item ?? null
+    setCreating(null)
+    setFolders((fs) =>
+      fs.some((f) => f.name.toLowerCase() === name.toLowerCase())
+        ? fs
+        : [...fs, { name, skin: FOLDER_SKINS[fs.length % FOLDER_SKINS.length] }],
+    )
+    if (forItem) fileInto(forItem, name)
+    else showToast(`Folder “${name}” created`)
   }
 
-  const startRecording = () => {
-    setDrawer(null)
-    setRecording(true)
-  }
+  // mic released → transcribe (brief), drop the card onto the stack, then let Signal weigh in
   const stopRecording = () => {
-    setRecording(false)
-    const id = `y-${seq++}`
-    const body = sampleTranscripts[seq % sampleTranscripts.length]
-    const memo: YapItem = { kind: 'yap', id, body, meta: 'Voice memo · just now' }
-    setFeed((f) => [memo, ...f])
-    setDrawer({ item: memo, fresh: true })
+    setRecPhase('processing')
+    setTimeout(() => {
+      const id = `y-${seq++}`
+      const body = sampleTranscripts[seq % sampleTranscripts.length]
+      const memo: YapItem = {
+        kind: 'yap',
+        id,
+        body,
+        meta: 'Voice memo · just now',
+        status: 'new',
+        topic: '',
+        skin: MEMO_SKINS[seq % MEMO_SKINS.length],
+      }
+      setFeed((f) => [memo, ...f])
+      setFreshId(id)
+      setRecording(false)
+      setRecPhase('listening')
+      // let the card settle on the stack before the agent opens
+      setTimeout(() => {
+        doExplain(memo)
+        setFreshId(null)
+      }, 760)
+    }, 1050)
   }
 
-  const askSent = async () => {
-    const capturedContext = askContext
-    setAskContext(null)
-
-    if (!capturedContext) return
-
-    const placeholderId = `thinking-${seq++}`
-    const placeholder: YapItem = {
-      kind: 'yap',
-      id: placeholderId,
-      body: 'Signal AI is analysing your reel…',
-      meta: 'RM Radar · just now',
-    }
-    setFeed((f) => [placeholder, ...f])
-    showToast('Signal AI is analysing…')
-
-    try {
-      const res = await fetch(`${API}/signals/reel`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caption: capturedContext, client_uuid: FELIX_UUID }),
-        credentials: 'include',
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        const id = `ai-${seq++}`
-        const rmItem: RMNudgeItem = {
-          kind: 'rm_nudge',
-          id,
-          headline: data.client_card?.headline ?? 'New insight from Signal AI',
-          body: data.client_card?.body ?? '',
-          meta: 'From Anna · Signal AI · just now',
-        }
-        setFeed((f) => f.map((item) => (item.id === placeholderId ? rmItem : item)))
-        showToast('Anna has received your signal')
-      } else {
-        setFeed((f) => f.filter((item) => item.id !== placeholderId))
-        showToast('Sent to Anna')
+  // tap opens the recorder; press-and-hold records while held, release to capture
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const heldRef = useRef(false)
+  const micDown = () => {
+    heldRef.current = false
+    const onUp = () => {
+      window.removeEventListener('pointerup', onUp)
+      if (holdTimer.current) {
+        clearTimeout(holdTimer.current)
+        holdTimer.current = null
+        setRecording(true) // quick tap → manual recorder
+      } else if (heldRef.current) {
+        stopRecording() // was holding → capture on release
       }
-    } catch {
-      setFeed((f) => f.filter((item) => item.id !== placeholderId))
-      showToast('Sent to Anna')
     }
+    window.addEventListener('pointerup', onUp)
+    holdTimer.current = setTimeout(() => {
+      holdTimer.current = null
+      heldRef.current = true
+      setRecording(true)
+    }, 220)
+  }
+
+  const askSent = () => {
+    setAskContext(null)
+    showToast('Sent to Clara')
   }
 
   return (
@@ -156,7 +215,7 @@ export default function App() {
       nav={
         <BottomNav
           active={advisorOpen ? 'advisor' : 'home'}
-          onMic={startRecording}
+          onMicDown={micDown}
           onChange={(id) => id === 'advisor' && setAdvisorOpen(true)}
         />
       }
@@ -174,19 +233,36 @@ export default function App() {
               showToast('Call requested — Clara will confirm')
             }}
           />
-          <QuickActionsDrawer
-            item={drawer?.item ?? null}
-            fresh={drawer?.fresh}
-            onClose={() => setDrawer(null)}
-            onExplain={doExplain}
-            onSendRM={doSendRM}
-            onRecordAgain={startRecording}
-            onDelete={doDelete}
-          />
           <RecordingDrawer
             open={recording}
+            phase={recPhase}
             onStop={stopRecording}
             onCancel={() => setRecording(false)}
+          />
+          <FolderSheet
+            folder={openFolderData}
+            onClose={() => setOpenFolder(null)}
+            onOpen={(it) => {
+              setOpenFolder(null)
+              doExplain(it)
+            }}
+            onRemove={unfile}
+          />
+          <MoveSheet
+            item={moveItem}
+            folders={foldersData.map((f) => ({ name: f.name, skin: f.skin, count: f.items.length }))}
+            onPick={(name) => moveItem && fileInto(moveItem, name)}
+            onCreate={() => {
+              const it = moveItem
+              setMoveItem(null)
+              setCreating({ item: it })
+            }}
+            onClose={() => setMoveItem(null)}
+          />
+          <CreateFolderSheet
+            open={!!creating}
+            onCreate={createFolder}
+            onClose={() => setCreating(null)}
           />
           <AIExplainSheet
             payload={explain}
@@ -196,57 +272,111 @@ export default function App() {
               setExplain(null)
               setAskContext(ctx)
             }}
+            onConfirm={() => {
+              setExplain(null)
+              showToast('Price alert set — Clara is in the loop')
+            }}
+            onResearch={() =>
+              setStockSheet({
+                assets: explain?.related ?? [],
+                title: 'Research',
+                subtitle: 'Names tied to this idea',
+              })
+            }
+          />
+          <ResearchSheet
+            assets={stockSheet?.assets ?? null}
+            title={stockSheet?.title}
+            subtitle={stockSheet?.subtitle}
+            onClose={() => setStockSheet(null)}
           />
           <ForwardSheet context={askContext} onClose={() => setAskContext(null)} onSent={askSent} />
           <Toast message={toast} />
+          {intro && <IntroSplash name={CLIENT.name} />}
         </>
       }
     >
       <div className="pb-32">
-        <Greeting name={CLIENT.name} initial={CLIENT.initial} />
+        <Greeting
+          name={CLIENT.name}
+          initial={CLIENT.initial}
+          onWatchlist={() =>
+            setStockSheet({ assets: watchlist, title: 'Watchlist', subtitle: 'Names you’re tracking' })
+          }
+        />
 
-        <div className="px-5">
+        <div
+          className="px-5"
+          style={{ animation: 'introUp 0.95s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '1.75s' }}
+        >
           <BalanceCard node={current} atRoot={atRoot} pct={pct} delta={delta} periodLabel={periodLabel} />
         </div>
 
-        <div className="mt-5 px-5">
-          <Breadcrumb path={path} onJump={jumpTo} />
-        </div>
-        <div className="mt-2 px-5">
-          <Treemap node={current} depth={path.length - 1} factor={factor} onDrill={drill} />
-        </div>
-
-        {/* timeframe — controls the card delta and the bento changes */}
-        <div className="mt-4 px-5">
+        {/* timeframe — above the portfolio, controls the card + bento */}
+        <div
+          className="mt-4 px-5"
+          style={{ animation: 'introUp 0.95s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '1.95s' }}
+        >
           <Timeframes active={tf} onChange={setTf} />
         </div>
 
-        {/* Activity log */}
-        <div className="mt-8 px-4">
-          <h2 className="mb-3 px-1 text-[17px] font-semibold tracking-tight text-ink">Activity</h2>
+        {/* Portfolio */}
+        <div
+          className="mt-6 px-5"
+          style={{ animation: 'introUp 0.95s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '2.15s' }}
+        >
+          <Section
+            label="Portfolio"
+            title={
+              <span className="flex min-w-0 items-center gap-1.5">
+                {path.map((node, i) => {
+                  const last = i === path.length - 1
+                  return (
+                    <span key={node.id} className="flex flex-shrink-0 items-center gap-1.5">
+                      {i > 0 && <ChevronRight size={16} className="text-ink-faint" />}
+                      <button
+                        onClick={() => !last && jumpTo(i)}
+                        disabled={last}
+                        className={last ? 'text-ink' : 'text-ink-faint active:opacity-60'}
+                      >
+                        {i === 0 ? 'Portfolio' : node.name}
+                      </button>
+                    </span>
+                  )
+                })}
+              </span>
+            }
+          >
+            <Treemap node={current} depth={path.length - 1} onDrill={drill} />
+          </Section>
+        </div>
 
-          {feed.length ? (
-            <div className="card overflow-hidden p-0">
-              {feed.map((item, i) => (
-                <ActivityRow
-                  key={item.id}
-                  item={item}
-                  first={i === 0}
-                  onOpen={openItem}
-                  onExplain={doExplain}
-                  onSendRM={doSendRM}
-                  onDelete={doDelete}
-                />
-              ))}
+        {/* Activity */}
+        <div
+          className="mt-7 px-5"
+          style={{ animation: 'introUp 0.95s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '2.35s' }}
+        >
+          <Section title="Activity" label="Activity">
+            {stackItems.length > 0 && (
+              <ActivityDeck
+                items={stackItems}
+                freshId={freshId}
+                leavingId={leavingId}
+                onExplain={doExplain}
+                onSendRM={doSendRM}
+                onFile={doFile}
+                onDelete={doDelete}
+              />
+            )}
+
+            <div className={stackItems.length > 0 ? 'mt-8' : ''}>
+              <Folders
+                folders={foldersData}
+                onOpen={setOpenFolder}
+                onCreate={() => setCreating({ item: null })}
+              />
             </div>
-          ) : (
-            <div className="card flex flex-col items-center gap-1 px-4 py-12 text-center">
-              <div className="text-[14px] font-medium text-ink">Nothing here yet</div>
-              <div className="text-[12.5px] text-ink-faint">
-                Tap the mic to record a memo, or share a reel into Signal
-              </div>
-            </div>
-          )}
+          </Section>
         </div>
       </div>
     </PhoneFrame>

@@ -6,16 +6,18 @@ import type { RelatedAsset } from '../data/feed'
 
 interface Props {
   assets: RelatedAsset[] | null
+  title?: string
+  subtitle?: string
   onClose: () => void
 }
 
-export function ResearchSheet({ assets, onClose }: Props) {
+export function ResearchSheet({ assets, title = 'Research', subtitle = 'Names tied to this idea', onClose }: Props) {
   return (
     <Sheet open={!!assets} onClose={onClose} variant="light">
       {assets && (
         <div className="px-5 pt-2 pb-6">
-          <div className="text-[16px] font-semibold text-ink">Research</div>
-          <div className="text-[12.5px] font-medium text-ink-faint">Names tied to this idea</div>
+          <div className="text-[16px] font-semibold text-ink">{title}</div>
+          <div className="text-[12.5px] font-medium text-ink-faint">{subtitle}</div>
 
           <div className="mt-4 flex flex-col gap-2">
             {assets.map((a) => {
