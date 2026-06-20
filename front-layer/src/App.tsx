@@ -34,10 +34,10 @@ import {
 } from './data/feed'
 import { buildExplain, type ExplainPayload } from './lib/explain'
 
-const CLIENT = { name: 'Felix', initial: 'F' }
+const CLIENT = { name: 'Leo', initial: 'L' }
 
 // Backend connection — proxied to the Flask API (see vite.config.ts).
-// Felix is the demo client; his signals surface on Anna's RM Radar dashboard.
+// Leo is the demo client; his signals surface on Anna's RM Radar dashboard.
 const API = '/api/v1'
 const FELIX_UUID = 'nqhw1mq98wkdiznouvgcjx5v420gninp'
 
@@ -93,12 +93,12 @@ export default function App() {
     return () => clearTimeout(t)
   }, [])
 
-  // Sign Felix in once so his signals carry the auth cookie to the backend.
+  // Sign Leo in once so his signals carry the auth cookie to the backend.
   useEffect(() => {
     fetch(`${API}/users/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: 'felix.urban', password: 'demo1234' }),
+      body: JSON.stringify({ username: 'leo.ackermann', password: 'demo1234' }),
       credentials: 'include',
     }).catch(() => {})
   }, [])

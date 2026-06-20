@@ -89,7 +89,7 @@ docker-compose down && docker-compose up --build -d
 
 ---
 
-## STEP 2 — Seed the default data (Felix Urban)
+## STEP 2 — Seed the default data (Leo Ackermann)
 
 Run once after first `docker-compose up`:
 
@@ -106,7 +106,7 @@ Seed complete.
 
 Demo credentials:
   RM login     — username: anna.keller  password: demo1234
-  Client login — username: felix.urban  password: demo1234
+  Client login — username: leo.ackermann  password: demo1234
 ```
 
 If you see `Already seeded. Skipping.` — data exists, proceed.
@@ -123,7 +123,7 @@ cur.execute('DELETE FROM Opportunities')
 cur.execute('DELETE FROM Signals')
 cur.execute('DELETE FROM Portfolios')
 cur.execute('DELETE FROM Clients')
-cur.execute(\"DELETE FROM Users WHERE USERNAME IN ('anna.keller','felix.urban','lucas.bauer')\")
+cur.execute(\"DELETE FROM Users WHERE USERNAME IN ('anna.keller','leo.ackermann','lucas.bauer')\")
 c.commit()
 close_connection(c)
 print('Wiped.')
@@ -135,7 +135,7 @@ docker exec $(docker ps -qf "name=back-layer-backend") python seed.py
 
 ## STEP 3 — Seed Lucas Bauer (new money persona)
 
-Lucas is not in `seed.py` — run this once after Felix is seeded:
+Lucas is not in `seed.py` — run this once after Leo is seeded:
 
 ```bash
 docker exec $(docker ps -qf "name=back-layer-backend") python3 -c "
@@ -197,11 +197,11 @@ print('Lucas UUID:', lucas_uuid)
 
 ---
 
-### Felix Urban — Founder (existing wealth)
+### Leo Ackermann — Founder (existing wealth)
 
 | Field | Value |
 |-------|-------|
-| Username | `felix.urban` |
+| Username | `leo.ackermann` |
 | Password | `demo1234` |
 | Age | 34 |
 | Segment | `founder` |
@@ -289,18 +289,18 @@ curl -s -b cookies.txt http://localhost:8484/api/v1/clients/list \
   | python3 -m json.tool
 ```
 
-Expected: array with Felix Urban and Lucas Bauer.
+Expected: array with Leo Ackermann and Lucas Bauer.
 
 Save their UUIDs:
 
 ```bash
 export FELIX_UUID=$(curl -s -b cookies.txt http://localhost:8484/api/v1/clients/list \
-  | python3 -c "import sys,json; clients=json.load(sys.stdin)['clients']; [print(c['UUID']) for c in clients if c['NAME']=='Felix Urban']")
+  | python3 -c "import sys,json; clients=json.load(sys.stdin)['clients']; [print(c['UUID']) for c in clients if c['NAME']=='Leo Ackermann']")
 
 export LUCAS_UUID=$(curl -s -b cookies.txt http://localhost:8484/api/v1/clients/list \
   | python3 -c "import sys,json; clients=json.load(sys.stdin)['clients']; [print(c['UUID']) for c in clients if c['NAME']=='Lucas Bauer']")
 
-echo "Felix: $FELIX_UUID"
+echo "Leo: $FELIX_UUID"
 echo "Lucas: $LUCAS_UUID"
 ```
 
@@ -324,7 +324,7 @@ curl -s -b cookies.txt http://localhost:8484/api/v1/opportunities/pending \
   | python3 -m json.tool
 ```
 
-Expected: 3 opportunities for Felix (high urgency first), 0 for Lucas until reels are fired.
+Expected: 3 opportunities for Leo (high urgency first), 0 for Lucas until reels are fired.
 
 Get a single opportunity with full RM brief:
 
@@ -393,7 +393,7 @@ return full JSON      ← client_card + rm_brief + profile + portfolio_match
 
 ---
 
-### Felix Urban — Reel tests (founder, overweighted in tech)
+### Leo Ackermann — Reel tests (founder, overweighted in tech)
 
 **Reel A — Clean energy interest:**
 
@@ -410,7 +410,7 @@ curl -s -b cookies.txt -X POST http://localhost:8484/api/v1/signals/reel \
 
 What the pipeline does:
 - Profiler → sector: `energy`, values: `[sustainability, innovation]`, sentiment: `bullish`
-- Matcher → Felix has 5% in Commodities, no clean energy — gap_sector: `energy`
+- Matcher → Leo has 5% in Commodities, no clean energy — gap_sector: `energy`
 - Writer → client_card connects ESG interest to the portfolio gap, invites conversation
 
 **Reel B — Crypto / Bitcoin hype:**
@@ -428,7 +428,7 @@ curl -s -b cookies.txt -X POST http://localhost:8484/api/v1/signals/reel \
 
 What the pipeline does:
 - Profiler → sector: `crypto`, values: `[innovation, speed, status]`, sentiment: `bullish`
-- Matcher → Felix has no crypto — gap_sector: `crypto`
+- Matcher → Leo has no crypto — gap_sector: `crypto`
 - Playbook recalls: "Client agreed to cap digital assets at 3% after risk conversation"
 - Writer → frames as a risk/profile conversation, not a buy signal
 
@@ -518,12 +518,12 @@ curl -s -b cookies.txt http://localhost:8484/api/v1/clients/$LUCAS_UUID/opportun
 
 ---
 
-## STEP 12 — Client login (Felix or Lucas view)
+## STEP 12 — Client login (Leo or Lucas view)
 
 ```bash
 curl -s -c felix_cookies.txt -X POST http://localhost:8484/api/v1/users/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"felix.urban","password":"demo1234"}' | python3 -m json.tool
+  -d '{"username":"leo.ackermann","password":"demo1234"}' | python3 -m json.tool
 
 curl -s -c lucas_cookies.txt -X POST http://localhost:8484/api/v1/users/login \
   -H "Content-Type: application/json" \
@@ -695,9 +695,9 @@ The matcher maps the profiler's `sector` output to portfolio asset class names u
 
 - [ ] Health returns 200
 - [ ] `anna.keller` login returns success and sets cookie
-- [ ] `/clients/list` returns both Felix Urban and Lucas Bauer
-- [ ] `/opportunities/pending` returns 3 items for Felix, high urgency first
-- [ ] `/signals/reel` for Felix returns `client_card` with non-empty headline
+- [ ] `/clients/list` returns both Leo Ackermann and Lucas Bauer
+- [ ] `/opportunities/pending` returns 3 items for Leo, high urgency first
+- [ ] `/signals/reel` for Leo returns `client_card` with non-empty headline
 - [ ] `/signals/reel` for Lucas returns `is_overweight: true` on the wealth anxiety reel
 - [ ] `/opportunities/:id/send` changes status to `sent`
 - [ ] Unauthenticated request returns 401
@@ -705,5 +705,5 @@ The matcher maps the profiler's `sector` output to portfolio asset class names u
 Hand the frontend team:
 - Base URL: `http://localhost:8484`
 - RM credentials: `anna.keller` / `demo1234`
-- Client credentials: `felix.urban` / `demo1234`, `lucas.bauer` / `demo1234`
+- Client credentials: `leo.ackermann` / `demo1234`, `lucas.bauer` / `demo1234`
 - UUIDs: get live from `GET /api/v1/clients/list` — do not hardcode

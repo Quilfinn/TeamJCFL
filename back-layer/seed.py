@@ -28,8 +28,8 @@ def seed():
     felix_user_uuid = generate_uuid()
     cursor.execute(
         "INSERT INTO Users (UUID,USERNAME,FIRSTNAME,LASTNAME,EMAIL,PASSWORD,ACCOUNT_TYPE) VALUES (%s,%s,%s,%s,%s,%s,%s)",
-        (felix_user_uuid, 'felix.urban', 'Felix', 'Urban',
-         'felix@demo.com', generate_sha256('demo1234'), 'CLIENT')
+        (felix_user_uuid, 'leo.ackermann', 'Leo', 'Ackermann',
+         'leo@demo.com', generate_sha256('demo1234'), 'CLIENT')
     )
 
     # ── Client Profile ────────────────────────────────
@@ -38,8 +38,8 @@ def seed():
         """INSERT INTO Clients
            (UUID,USER_UUID,NAME,AGE,SEGMENT,RISK_PROFILE,RM_UUID,RM_NAME,AVATAR_INITIAL)
            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-        (felix_uuid, felix_user_uuid, 'Felix Urban', 34,
-         'founder', 'aggressive', rm_uuid, 'Anna Keller', 'F')
+        (felix_uuid, felix_user_uuid, 'Leo Ackermann', 34,
+         'founder', 'aggressive', rm_uuid, 'Anna Keller', 'L')
     )
 
     # ── Portfolio ─────────────────────────────────────
@@ -62,23 +62,23 @@ def seed():
             'topic': 'Tech concentration risk',
             'headline': "Your tech position caught Anna's eye",
             'body': "Your portfolio is 40% US tech and markets have been volatile this week. Anna thinks this is a good moment for a conversation.",
-            'rm_brief': "Felix holds 40% in US tech equities. Nasdaq dropped 8% this week. High concentration risk. Recommend diversification discussion — timing is good.",
-            'follow_up': "Felix, I have been keeping an eye on your tech position given the recent volatility — got 15 minutes this week?",
+            'rm_brief': "Leo holds 40% in US tech equities. Nasdaq dropped 8% this week. High concentration risk. Recommend diversification discussion — timing is good.",
+            'follow_up': "Leo, I have been keeping an eye on your tech position given the recent volatility — got 15 minutes this week?",
             'urgency': 'high'
         },
         {
             'topic': 'Idle cash opportunity',
             'headline': "Anna noticed your cash has been sitting",
             'body': "You have CHF 1.6M in cash from your recent exit sitting idle. Anna has some thoughts on putting it to work — on your terms.",
-            'rm_brief': "CHF 1.6M post-exit cash idle for 6 weeks. Felix is aggressive risk profile. Good moment to discuss structured products or private equity top-up.",
-            'follow_up': "Felix, that cash from your exit is ready to work harder — want me to walk you through a couple of options?",
+            'rm_brief': "CHF 1.6M post-exit cash idle for 6 weeks. Leo is aggressive risk profile. Good moment to discuss structured products or private equity top-up.",
+            'follow_up': "Leo, that cash from your exit is ready to work harder — want me to walk you through a couple of options?",
             'urgency': 'high'
         },
         {
             'topic': 'Clean energy interest signal',
             'headline': "Anna connected your interests to your wealth",
             'body': "Based on what you have been exploring lately Anna sees an interesting angle around sustainable investing that fits your portfolio.",
-            'rm_brief': "Felix shared clean energy content. Zero ESG exposure in current portfolio despite clear interest signal. Recommend ESG mandate conversation.",
+            'rm_brief': "Leo shared clean energy content. Zero ESG exposure in current portfolio despite clear interest signal. Recommend ESG mandate conversation.",
             'follow_up': "I saw you have been interested in clean energy — did you know your portfolio has no ESG exposure yet? Worth a chat.",
             'urgency': 'medium'
         },
@@ -122,4 +122,4 @@ if __name__ == '__main__':
     print("")
     print("Demo credentials:")
     print("  RM login    — username: anna.keller  password: demo1234")
-    print("  Client login — username: felix.urban  password: demo1234")
+    print("  Client login — username: leo.ackermann  password: demo1234")
