@@ -6,3 +6,4 @@ PyJWT
 requests
 groq
 chromadb
+pyktok

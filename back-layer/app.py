@@ -5,6 +5,9 @@ import jwt
 import datetime
 from db import create_connection, close_connection
 from auth import login_required, JWT_SECRET
+from werkzeug.security import check_password_hash
+from functools import wraps
+import pyktok as pyk
 
 logger = logging.getLogger("backend-app-logger")
 frontend_url = os.getenv("FRONTEND_URL")
@@ -24,16 +27,125 @@ def generate_uuid():
 def create_tables():
     connection = create_connection()
     cursor = connection.cursor()
-    cursor.execute(
-        "CREATE TABLE IF NOT EXISTS Users ("
-        "UUID VARCHAR(255) NOT NULL, USERNAME VARCHAR(255) UNIQUE NOT NULL, "
-        "FIRSTNAME VARCHAR(255) NOT NULL, LASTNAME VARCHAR(255) NOT NULL, "
-        "EMAIL VARCHAR(255) UNIQUE NOT NULL, PASSWORD VARCHAR(4000) NOT NULL, "
-        "ACCOUNT_TYPE VARCHAR(255), CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP, "
-        "EMAIL_CODE VARCHAR(255))"
-    )
+    query_table_users = "CREATE TABLE IF NOT EXISTS Users (UUID VARCHAR(255) NOT NULL, USERNAME VARCHAR(255) UNIQUE NOT NULL, FIRSTNAME VARCHAR(255) NOT NULL, LASTNAME VARCHAR(255) NOT NULL, EMAIL VARCHAR(255) UNIQUE NOT NULL, PASSWORD VARCHAR(4000) NOT NULL, ACCOUNT_TYPE VARCHAR(255), CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP, EMAIL_CODE VARCHAR(255))" # ACCOUNT_TYPE VARCHAR(255) NOT NULL
+    query_table_tiktoks = "CREATE TABLE IF NOT EXISTS TikToks (ID VARCHAR(255) UNIQUE NOT NULL, URL VARCHAR(455) NOT NULL, FILE_PATH VARCHAR(255))"
+    cursor.execute(query_table_users)
+    cursor.execute(query_table_tiktoks)
     connection.commit()
     close_connection(connection)
+
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.cookies.get("auth_token")
+
+        if not token:
+            return jsonify({
+                "status": "error",
+                "message": "Authentication required"
+            }), 401
+
+        try:
+            payload = jwt.decode(
+                token,
+                JWT_SECRET,
+                algorithms=["HS256"]
+            )
+
+            g.user = payload
+
+        except jwt.ExpiredSignatureError:
+            return jsonify({
+                "status": "error",
+                "message": "Token expired"
+            }), 401
+
+        except jwt.InvalidTokenError:
+            return jsonify({
+                "status": "error",
+                "message": "Invalid token"
+            }), 401
+
+        return f(*args, **kwargs)
+
+    return decorated
+
+@app.route(base_path + "main", methods=["GET"])
+@login_required
+def main_route():
+    connection = create_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    uuid = g.user["uuid"]
+
+    try:
+        query = """
+            SELECT UUID, USERNAME, PASSWORD, ACCOUNT_TYPE, EMAIL, FIRSTNAME, LASTNAME
+            FROM Users
+            WHERE UUID = %s
+        """
+
+        cursor.execute(query, (uuid,))
+        user = cursor.fetchone()
+
+        if not user:
+            return jsonify({
+                "status": "error",
+                "message": "Invalid credentials"
+            }), 401
+
+        return jsonify({
+            "username": g.user["username"],
+            "firstname": user["FIRSTNAME"],
+            "lastname": user["LASTNAME"],
+            "email": user["EMAIL"]
+        })
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": "Internal server error"
+        }), 500
+
+    finally:
+        close_connection(connection)
+
+@app.route(base_path + "tiktok/download", methods=["POST"])
+@login_required
+def tiktok_download_route():
+    data = request.json
+
+    url = data.get("URL")
+
+    if not url:
+        return jsonify({
+            "status": "error",
+            "message": "URL not specified"
+        }), 400
+
+    pyk.save_tiktok(url, True)
+
+    connection = create_connection()
+    cursor = connection.cursor()
+        
+    line = (generate_uuid(), url, "")
+
+    query = "INSERT INTO TikToks (ID, URL, FILE_PATH) VALUES (%s, %s, %s)"
+
+    try:
+        cursor.execute(query, line)
+        connection.commit()
+        close_connection(connection)
+    except errors.IntegrityError as e:
+        if e.errno == 1062:
+            return jsonify({"status_message": "The username or email already exists. Please choose a different."}), 400
+        else:
+            return jsonify({"status_message": "There was an error in the data processing."}), 500
+
+    return jsonify({
+        "status": "success",
+        "message": "TikTok downloaded successfully"
+    }), 201
 
 @app.route("/", methods=["GET", "POST"])
 def main_path():
