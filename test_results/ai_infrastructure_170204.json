@@ -1,0 +1,53 @@
+{
+  "scenario_id": "ai_infrastructure",
+  "timestamp": "2026-06-20T17:02:04.206293",
+  "result": {
+    "client_card": {
+      "body": "Felix, your interest in AI infrastructure is intriguing, given your existing portfolio's significant concentration in US Tech Equities. It might be worth a conversation to explore how this interest aligns with your overall wealth goals and risk tolerance.",
+      "cta": "Talk to Anna Keller",
+      "headline": "AI Infrastructure",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio already holds 40.00% in US Tech Equities (CHF 2,560,000) \u2014 this is an overweight position with significant concentration risk. Adding more exposure to this sector would increase risk further.",
+      "gap_sector": "diversification",
+      "is_overweight": true,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what specific AI infrastructure companies are you considering investing in, beyond NVIDIA?",
+      "investment_signal": "The client is likely to invest in AI-related infrastructure and technology stocks, seeking to capitalize on the growing demand for AI solutions.",
+      "sector": "tech",
+      "sentiment": "bullish",
+      "topic": "AI infrastructure investment",
+      "values": [
+        "innovation",
+        "independence",
+        "legacy"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "There is a rotation opportunity to diversify your portfolio, given the current overweight in tech and no current exposure to other sectors that could provide a more balanced investment approach.",
+      "playbook_reference": "Similar clients have explored diversification strategies to manage concentration risk, while maintaining their commitment to innovative sectors.",
+      "portfolio_context": "Your portfolio already holds 40.00% in US Tech Equities (CHF 2,560,000) \u2014 this is an overweight position with significant concentration risk, indicating a need to consider the potential impact of adding more exposure to this sector.",
+      "suggested_follow_up": "Felix Urban, given your aggressive risk profile, I'd like to discuss how we can balance your portfolio while still embracing your enthusiasm for cutting-edge technologies like AI infrastructure.",
+      "summary": "Felix Urban's interest in AI infrastructure signals a desire to stay at the forefront of innovation, which aligns with his values.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "no_buy_advice",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": []
+  },
+  "scenario_issues": [],
+  "demo_ready": true
+}

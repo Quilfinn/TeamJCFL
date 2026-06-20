@@ -1,0 +1,53 @@
+{
+  "scenario_id": "clean_energy_esg",
+  "timestamp": "2026-06-20T18:07:57.447223",
+  "result": {
+    "client_card": {
+      "body": "As you explore the potential of green energy, it's worth considering how this interest aligns with your overall wealth goals. Let's discuss how your values of sustainability and innovation can be reflected in your portfolio.",
+      "cta": "Talk to Anna Keller",
+      "headline": "Clean Energy Shift",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio currently has no exposure to energy.",
+      "gap_sector": "energy",
+      "is_overweight": false,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what specific green energy investment opportunities are you most excited about for the second half of 2026?",
+      "investment_signal": "The client is likely to increase their allocation to ESG funds and green energy investments in their portfolio.",
+      "sector": "energy",
+      "sentiment": "bullish",
+      "topic": "Clean Energy Shift",
+      "values": [
+        "sustainability",
+        "innovation",
+        "independence"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "There is no current exposure to the energy sector, which may present an opportunity to explore ESG-focused investments.",
+      "playbook_reference": "Similar clients have explored sustainable bond mandates and digital asset allocations in response to ESG interests.",
+      "portfolio_context": "Your portfolio currently has no exposure to energy.",
+      "suggested_follow_up": "Felix Urban, given your aggressive risk profile, I'd like to explore how we can align your portfolio with your interest in clean energy and sustainability.",
+      "summary": "Felix Urban's interest in clean energy signals a potential desire to incorporate ESG considerations into their portfolio.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "no_buy_advice",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": []
+  },
+  "scenario_issues": [],
+  "demo_ready": true
+}

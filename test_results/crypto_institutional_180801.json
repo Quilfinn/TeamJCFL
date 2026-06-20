@@ -1,0 +1,53 @@
+{
+  "scenario_id": "crypto_institutional",
+  "timestamp": "2026-06-20T18:08:01.372831",
+  "result": {
+    "client_card": {
+      "body": "Felix, your interest in crypto institutional adoption is noteworthy, given the current landscape. It might be worth a conversation to explore how this trend could impact your overall wealth strategy.",
+      "cta": "Talk to Anna Keller",
+      "headline": "Crypto's Rise",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio currently has no exposure to digital assets (crypto).",
+      "gap_sector": "crypto",
+      "is_overweight": false,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what specific allocation to bitcoin are you considering for your portfolio given the growing institutional adoption?",
+      "investment_signal": "The client is likely to increase their allocation to digital assets, particularly bitcoin, in their investment portfolio.",
+      "sector": "crypto",
+      "sentiment": "bullish",
+      "topic": "Crypto Institutional Adoption",
+      "values": [
+        "innovation",
+        "security",
+        "independence"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "Felix has no current exposure to the crypto sector, presenting an opportunity for discussion.",
+      "playbook_reference": "Similar clients have discussed the volatility of digital assets in relation to their risk profile, leading to a more informed portfolio strategy.",
+      "portfolio_context": "Your portfolio currently has no exposure to digital assets (crypto). No overweight concern. Client risk profile: aggressive (founder segment).",
+      "suggested_follow_up": "Felix, considering your aggressive risk profile, I think it's worth discussing how the growing institutional adoption of crypto could fit into your overall investment approach.",
+      "summary": "Felix Urban has shown interest in crypto institutional adoption, signaling a potential desire to diversify their portfolio.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "no_buy_advice",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": []
+  },
+  "scenario_issues": [],
+  "demo_ready": true
+}

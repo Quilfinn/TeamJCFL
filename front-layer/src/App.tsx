@@ -19,10 +19,14 @@ import {
   sampleTranscripts,
   type FeedItem,
   type YapItem,
+  type RMNudgeItem,
 } from './data/feed'
 import { buildExplain, type ExplainPayload } from './lib/explain'
 
 const CLIENT = { name: 'Felix', initial: 'F' }
+
+const API = '/api/v1'
+const FELIX_UUID = 'nqhw1mq98wkdiznouvgcjx5v420gninp'
 
 let seq = 0
 
@@ -62,6 +66,15 @@ export default function App() {
     }
   }, [])
 
+  useEffect(() => {
+    fetch(`${API}/users/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'felix.urban', password: 'demo1234' }),
+      credentials: 'include',
+    }).catch(() => {})
+  }, [])
+
   const openItem = (item: FeedItem) => setDrawer({ item, fresh: false })
 
   const doExplain = (item: FeedItem) => {
@@ -69,6 +82,7 @@ export default function App() {
     setExplain(buildExplain(item))
   }
   const doSendRM = (item: FeedItem) => {
+    if (item.kind === 'rm_nudge') return
     setDrawer(null)
     setAskContext(item.kind === 'reel' ? item.caption : item.body)
   }
@@ -91,9 +105,50 @@ export default function App() {
     setDrawer({ item: memo, fresh: true })
   }
 
-  const askSent = () => {
+  const askSent = async () => {
+    const capturedContext = askContext
     setAskContext(null)
-    showToast('Sent to Clara')
+
+    if (!capturedContext) return
+
+    const placeholderId = `thinking-${seq++}`
+    const placeholder: YapItem = {
+      kind: 'yap',
+      id: placeholderId,
+      body: 'Signal AI is analysing your reel…',
+      meta: 'RM Radar · just now',
+    }
+    setFeed((f) => [placeholder, ...f])
+    showToast('Signal AI is analysing…')
+
+    try {
+      const res = await fetch(`${API}/signals/reel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caption: capturedContext, client_uuid: FELIX_UUID }),
+        credentials: 'include',
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        const id = `ai-${seq++}`
+        const rmItem: RMNudgeItem = {
+          kind: 'rm_nudge',
+          id,
+          headline: data.client_card?.headline ?? 'New insight from Signal AI',
+          body: data.client_card?.body ?? '',
+          meta: 'From Anna · Signal AI · just now',
+        }
+        setFeed((f) => f.map((item) => (item.id === placeholderId ? rmItem : item)))
+        showToast('Anna has received your signal')
+      } else {
+        setFeed((f) => f.filter((item) => item.id !== placeholderId))
+        showToast('Sent to Anna')
+      }
+    } catch {
+      setFeed((f) => f.filter((item) => item.id !== placeholderId))
+      showToast('Sent to Anna')
+    }
   }
 
   return (

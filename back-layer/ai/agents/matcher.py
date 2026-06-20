@@ -1,8 +1,8 @@
 from db import create_connection, close_connection
 
 SECTOR_MAP = {
-    'tech':        ['tech', 'technology', 'equity', 'us tech'],
-    'energy':      ['energy', 'commodities', 'oil', 'solar', 'clean'],
+    'tech':        ['us tech', 'tech', 'technology'],
+    'energy':      ['energy', 'oil', 'solar', 'clean', 'esg', 'green'],
     'realestate':  ['real estate', 'property', 'reit'],
     'healthcare':  ['healthcare', 'pharma', 'biotech'],
     'crypto':      ['crypto', 'digital', 'bitcoin', 'blockchain'],
@@ -31,20 +31,32 @@ def match_portfolio(client_uuid: str, sector: str) -> dict:
         ac = row['ASSET_CLASS'].lower()
         weight = float(row['WEIGHT_PCT'])
         if any(k in ac for k in keywords):
-            existing = row
+            if existing is None or weight > float(existing['WEIGHT_PCT']):
+                existing = row
             if weight > 35:
                 is_overweight = True
 
     matched_weight = float(existing['WEIGHT_PCT']) if existing else 0
     gap_sector = sector if matched_weight < 5 else 'diversification'
 
-    if existing:
-        context = (f"Your portfolio holds {existing['WEIGHT_PCT']}% "
-                   f"in {existing['ASSET_CLASS']} "
-                   f"(CHF {float(existing['VALUE_CHF']):,.0f}).")
+    if existing and is_overweight:
+        context = (
+            f"Your portfolio already holds {existing['WEIGHT_PCT']}% "
+            f"in {existing['ASSET_CLASS']} "
+            f"(CHF {float(existing['VALUE_CHF']):,.0f}) — "
+            f"this is an overweight position with significant concentration risk. "
+            f"Adding more exposure to this sector would increase risk further."
+        )
+    elif existing:
+        context = (
+            f"Your portfolio already holds {existing['WEIGHT_PCT']}% "
+            f"in {existing['ASSET_CLASS']} "
+            f"(CHF {float(existing['VALUE_CHF']):,.0f})."
+        )
     else:
-        context = (f"Your portfolio currently has minimal exposure "
-                   f"to {sector}.")
+        sector_label = 'digital assets (crypto)' if sector == 'crypto' else sector
+        context = (f"Your portfolio currently has no exposure "
+                   f"to {sector_label}.")
 
     return {
         'existing_position': existing,

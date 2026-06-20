@@ -1,0 +1,53 @@
+{
+  "scenario_id": "tech_rotation",
+  "timestamp": "2026-06-20T17:29:13.679650",
+  "result": {
+    "client_card": {
+      "body": "Your interest in AI infrastructure stocks is intriguing, given your existing tech holdings. It's worth a conversation to explore how this might fit into your overall wealth strategy.",
+      "cta": "Talk to Anna Keller",
+      "headline": "AI Insights",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio already holds 40.00% in US Tech Equities (CHF 2,560,000) \u2014 this is an overweight position with significant concentration risk. Adding more exposure to this sector would increase risk further.",
+      "gap_sector": "diversification",
+      "is_overweight": true,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what specific AI infrastructure stocks are you considering for your next investment?",
+      "investment_signal": "The client is likely to allocate more funds to AI infrastructure and digital money, while reducing exposure to big tech.",
+      "sector": "tech",
+      "sentiment": "cautious",
+      "topic": "Tech Rotation and AI",
+      "values": [
+        "innovation",
+        "speed",
+        "independence"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "There's a rotation opportunity to diversify your portfolio, as you have no current exposure to other sectors that could potentially balance out the overweight tech position.",
+      "playbook_reference": "Similar clients have used periodic portfolio reviews to assess their exposure and make adjustments to maintain an optimal risk profile.",
+      "portfolio_context": "Your portfolio already holds 40.00% in US Tech Equities (CHF 2,560,000) \u2014 this is an overweight position with significant concentration risk. Adding more exposure to this sector would increase risk further.",
+      "suggested_follow_up": "Felix Urban, given your aggressive risk profile, let's discuss how we can navigate the tech sector while ensuring your portfolio remains balanced and resilient.",
+      "summary": "Felix Urban's inquiry about AI infrastructure stocks signals a continued interest in the tech sector, which is already a significant part of their portfolio.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "no_buy_advice",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": []
+  },
+  "scenario_issues": [],
+  "demo_ready": true
+}

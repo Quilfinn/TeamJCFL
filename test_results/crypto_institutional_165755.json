@@ -1,0 +1,56 @@
+{
+  "scenario_id": "crypto_institutional",
+  "timestamp": "2026-06-20T16:57:55.048088",
+  "result": {
+    "client_card": {
+      "body": "As someone who values innovation and independence, you may be interested in exploring how crypto can enhance your portfolio's diversification. Considering your current minimal exposure to crypto, I'd love to discuss how this trend might align with your overall wealth strategy and goals, would you like to talk more about it?",
+      "cta": "Talk to Anna Keller",
+      "headline": "Crypto Insights",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio currently has minimal exposure to crypto.",
+      "gap_sector": "crypto",
+      "is_overweight": false,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what's your current exposure to crypto and how do you think this trend might impact your overall wealth strategy?",
+      "investment_signal": "This implies a potential increase in allocation to digital assets in their investment portfolio.",
+      "sector": "crypto",
+      "sentiment": "bullish",
+      "topic": "Bitcoin and Crypto",
+      "values": [
+        "innovation",
+        "security",
+        "independence"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "The current portfolio has a gap in crypto exposure, which could be an opportunity to enhance diversification and align with Felix's values of innovation and independence.",
+      "playbook_reference": "Similar clients have allocated up to 3 percent of their portfolio to digital assets, and also increased their equity allocation after reviewing their overall wealth strategy.",
+      "portfolio_context": "Your portfolio currently has minimal exposure to crypto, with a previously agreed maximum allocation of 3 percent to digital assets.",
+      "suggested_follow_up": "Felix, what's your current exposure to crypto and how do you think this trend might impact your overall wealth strategy?",
+      "summary": "Felix shared crypto content, signaling his interest in exploring alternative assets and diversification strategies.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "no_buy_advice",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": []
+  },
+  "scenario_issues": [
+    "Expected phrase missing from RM brief: 'risk'",
+    "Expected phrase missing from RM brief: 'profile'"
+  ],
+  "demo_ready": false
+}

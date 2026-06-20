@@ -41,8 +41,8 @@ def save_opportunity(client_uuid: str, data: dict) -> int:
 def process_reel(client_uuid: str, url: str,
                  caption: str, hashtags: list) -> dict:
 
-    # Try oEmbed enrichment for TikTok URLs
-    if 'tiktok.com' in url:
+    # oEmbed enrichment: only fills in caption when none was provided
+    if 'tiktok.com' in url and not caption.strip():
         try:
             r = req.get(
                 f'https://www.tiktok.com/oembed?url={url}',
@@ -68,7 +68,9 @@ def process_reel(client_uuid: str, url: str,
     playbook = query_playbook(profile['topic'], profile['sector'])
     outputs = write_outputs(
         profile, match, playbook,
-        client['NAME'], client['RM_NAME']
+        client['NAME'], client['RM_NAME'],
+        client.get('RISK_PROFILE', 'moderate'),
+        client.get('SEGMENT', 'private')
     )
 
     # Save as opportunity — status pending, RM sees it on dashboard

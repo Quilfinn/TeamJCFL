@@ -1,0 +1,58 @@
+{
+  "scenario_id": "tech_rotation",
+  "timestamp": "2026-06-20T16:56:02.710016",
+  "result": {
+    "client_card": {
+      "body": "Your interest in AI infrastructure stocks aligns with the tech sector's growth potential, and considering your current portfolio allocation, it may be worth exploring how this could enhance your overall diversification. I'd love to discuss how this could fit into your existing wealth strategy and explore options that align with your values of innovation, speed, and security.",
+      "cta": "Talk to Anna Keller",
+      "headline": "AI Infrastructure",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio holds 20.00% in Private Equity (CHF 1,280,000).",
+      "gap_sector": "diversification",
+      "is_overweight": true,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what specific AI infrastructure stocks are you considering adding to your portfolio?",
+      "investment_signal": "The client is likely to increase their allocation to AI and digital infrastructure stocks in the near term.",
+      "sector": "tech",
+      "sentiment": "bullish",
+      "topic": "Stocks to Buy",
+      "values": [
+        "innovation",
+        "speed",
+        "security"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "The portfolio has a gap in terms of diversification, with low or no exposure to certain sectors, including tech and AI infrastructure.",
+      "playbook_reference": "Similar clients have successfully increased their equity allocation and explored digital asset allocation, while maintaining a balanced risk profile.",
+      "portfolio_context": "Your portfolio currently holds 20.00% in Private Equity, with CHF 1,280,000 allocated.",
+      "suggested_follow_up": "Felix, what specific AI infrastructure stocks are you considering adding to your portfolio?",
+      "summary": "Felix shared S&P 500 analysis and crypto content, signaling a desire to explore new opportunities and diversify his portfolio.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "no_buy_advice",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": []
+  },
+  "scenario_issues": [
+    "Sentiment unexpected: got 'bullish' (expected one of ['cautious', 'bearish'])",
+    "Expected phrase missing from RM brief: 'concentration'",
+    "Expected phrase missing from RM brief: 'overweight'",
+    "Expected phrase missing from RM brief: 'rotation'"
+  ],
+  "demo_ready": false
+}

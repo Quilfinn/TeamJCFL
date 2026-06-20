@@ -1,0 +1,55 @@
+{
+  "scenario_id": "clean_energy_esg",
+  "timestamp": "2026-06-20T16:56:07.179585",
+  "result": {
+    "client_card": {
+      "body": "Your interest in the clean energy transition is aligned with your values of sustainability and innovation, and it's exciting to consider how this can contribute to your long-term wealth growth. As you continue to explore this space, I'd love to discuss how your current portfolio, including your recent green bond allocation, can be optimized to support your goals.",
+      "cta": "Talk to Anna Keller",
+      "headline": "Clean Energy Growth",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio holds 5.00% in Commodities (CHF 320,000).",
+      "gap_sector": "diversification",
+      "is_overweight": false,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what specific aspects of the clean energy transition are you most excited about for your portfolio's long-term growth?",
+      "investment_signal": "The client is likely to increase their allocation to ESG and green energy investments in their portfolio.",
+      "sector": "energy",
+      "sentiment": "bullish",
+      "topic": "Clean Energy",
+      "values": [
+        "sustainability",
+        "innovation",
+        "independence"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "There is an opportunity to further diversify your portfolio by exploring other clean energy investments, given your current low exposure to this sector.",
+      "playbook_reference": "Similar clients have successfully allocated to sustainable bond mandates and digital assets, with a maximum allocation of 3 percent to the latter.",
+      "portfolio_context": "Your portfolio currently holds 5.00% in Commodities, with a recent allocation of CHF 400k to green bonds.",
+      "suggested_follow_up": "Felix, what specific aspects of the clean energy transition are you most excited about for your portfolio's long-term growth?",
+      "summary": "Felix shared content on solar energy and crypto, signaling a strong interest in the clean energy transition and innovative technologies.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "no_buy_advice",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": []
+  },
+  "scenario_issues": [
+    "Expected phrase missing from RM brief: 'ESG'"
+  ],
+  "demo_ready": false
+}

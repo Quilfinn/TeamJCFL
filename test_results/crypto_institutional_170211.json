@@ -1,0 +1,53 @@
+{
+  "scenario_id": "crypto_institutional",
+  "timestamp": "2026-06-20T17:02:11.850799",
+  "result": {
+    "client_card": {
+      "body": "As someone who values innovation, you may be interested in exploring the growing trend of institutional adoption in the crypto space. This could be worth a conversation, considering your current portfolio has minimal exposure to crypto.",
+      "cta": "Talk to Anna Keller",
+      "headline": "Crypto Insights",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio currently has minimal exposure to crypto.",
+      "gap_sector": "crypto",
+      "is_overweight": false,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what specific allocation targets are you considering for your digital assets portfolio in the next quarter?",
+      "investment_signal": "The client is likely to increase their allocation to digital assets, particularly bitcoin, in their investment portfolio.",
+      "sector": "crypto",
+      "sentiment": "bullish",
+      "topic": "Crypto Institutional Adoption",
+      "values": [
+        "innovation",
+        "security",
+        "independence"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "There is no current exposure to the crypto sector, presenting an opportunity to explore this space.",
+      "playbook_reference": "Similar clients have explored digital assets to enhance their portfolio's innovation and security aspects.",
+      "portfolio_context": "Your portfolio currently has minimal exposure to crypto. Given your aggressive risk profile, we can discuss potential opportunities without concentration or exposure concerns.",
+      "suggested_follow_up": "Felix Urban, given your aggressive risk profile, I think it's worth discussing how crypto could fit into your overall wealth strategy.",
+      "summary": "Felix Urban's interest in crypto signals a potential desire to diversify their portfolio and stay ahead of the curve.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "no_buy_advice",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": []
+  },
+  "scenario_issues": [],
+  "demo_ready": true
+}

@@ -1,0 +1,55 @@
+{
+  "scenario_id": "clean_energy_esg",
+  "timestamp": "2026-06-20T17:02:08.371404",
+  "result": {
+    "client_card": {
+      "body": "As you consider expanding your portfolio, your interest in clean energy transition is worth a conversation, given your existing commodities holdings. Let's discuss how this aligns with your overall wealth goals and values of sustainability and innovation.",
+      "cta": "Talk to Anna Keller",
+      "headline": "Green Energy",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio already holds 5.00% in Commodities (CHF 320,000).",
+      "gap_sector": "diversification",
+      "is_overweight": false,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what specific green energy investments are you considering adding to your portfolio this year?",
+      "investment_signal": "The client is likely to invest in green energy and ESG funds to capitalize on the clean energy transition.",
+      "sector": "energy",
+      "sentiment": "bullish",
+      "topic": "Clean Energy Transition",
+      "values": [
+        "sustainability",
+        "innovation",
+        "independence"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "There is no current exposure to the diversification sector, presenting an opportunity to explore new areas.",
+      "playbook_reference": "Similar clients have explored sustainable bond mandates and digital asset allocations to align their portfolios with their values and risk profiles.",
+      "portfolio_context": "Your portfolio already holds 5.00% in Commodities (CHF 320,000), with no overweight concern given your aggressive risk profile.",
+      "suggested_follow_up": "Felix Urban, considering your aggressive risk profile, I'd like to explore how we can align your portfolio with your interest in green energy and values of sustainability and innovation.",
+      "summary": "Felix Urban expressed interest in green energy investments, signaling a potential desire to diversify and align his portfolio with his values of sustainability and innovation.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "no_buy_advice",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": []
+  },
+  "scenario_issues": [
+    "Expected phrase missing from RM brief: 'ESG'"
+  ],
+  "demo_ready": false
+}

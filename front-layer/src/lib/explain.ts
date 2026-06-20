@@ -21,18 +21,18 @@ const REEL_BRIEFS: Record<string, Omit<ExplainPayload, 'source' | 'contextLabel'
       'Concentration risk is low; this fits as a diversifier, not a core bet.',
     ],
     suggestionTitle: 'Add 2% to your gold hedge',
-    suggestionMeta: '~CHF 86’000',
+    suggestionMeta: '~CHF 86\'000',
   },
   r2: {
     brief:
-      'The reel maps the 2026 AI capex cycle to the names that capture the spend — compute, foundry and power/cooling. The picks are reasonable, but most are already priced for perfection.',
+      'The reel maps the 2026 AI capex cycle to the names that capture the spend — compute, foundry and power/cooling. The picks are reasonable, but most are already priced for perfection. Signal is mixed — don\'t act without a clearer thesis.',
     points: [
       'Your tech & growth sleeve is CHF 712K — already 17% of the book.',
-      'Adding here raises concentration; consider the power/cooling angle instead.',
-      'Vertiv is the contrarian read — down today, but levered to the same theme.',
+      'Adding here raises concentration without a clear edge; wait for a better entry.',
+      'Vertiv is the most interesting contrarian angle if you want exposure.',
     ],
-    suggestionTitle: 'Tilt 1% toward AI power & cooling',
-    suggestionMeta: '~CHF 43’000',
+    suggestionTitle: 'Hold — check with Clara before any moves',
+    suggestionMeta: 'AI capex signal is mixed',
   },
 }
 
@@ -47,17 +47,26 @@ export function buildExplain(item: FeedItem): ExplainPayload {
       ...b,
     }
   }
+  if (item.kind === 'yap') {
+    return {
+      source: 'yap',
+      contextLabel: item.body,
+      brief:
+        'Signal AI read your memo and checked it against your current allocation. The instinct holds up — here is the context before you raise it with Clara.',
+      points: [
+        'Emerging markets are 4.6% of the book; trimming to ~3% is well inside your mandate.',
+        'Swiss quality lowers volatility without giving up much expected return.',
+        'No tax event triggered at this size — clean to execute.',
+      ],
+      suggestionTitle: 'Draft the rotation for Clara to review',
+      suggestionMeta: 'EM → Swiss quality',
+    }
+  }
   return {
     source: 'yap',
-    contextLabel: item.body,
-    brief:
-      'Signal AI read your memo and checked it against your current allocation. The instinct holds up — here is the context before you raise it with Clara.',
-    points: [
-      'Emerging markets are 4.6% of the book; trimming to ~3% is well inside your mandate.',
-      'Swiss quality lowers volatility without giving up much expected return.',
-      'No tax event triggered at this size — clean to execute.',
-    ],
-    suggestionTitle: 'Draft the rotation for Clara to review',
-    suggestionMeta: 'EM → Swiss quality',
+    contextLabel: item.headline,
+    brief: item.body,
+    points: [],
+    suggestionTitle: 'Discuss with Clara',
   }
 }

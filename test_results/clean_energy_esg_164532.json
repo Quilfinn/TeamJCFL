@@ -1,0 +1,54 @@
+{
+  "scenario_id": "clean_energy_esg",
+  "timestamp": "2026-06-20T16:45:32.878617",
+  "result": {
+    "client_card": {
+      "body": "As you explore sustainable investments, your existing commodities allocation may benefit from diversification into green energy sectors. I'd love to discuss how your values of sustainability and innovation can be further reflected in your portfolio, and explore opportunities that align with your long-term goals.",
+      "cta": "Talk to Anna Keller",
+      "headline": "Green Energy Growth",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio holds 5.00% in Commodities (CHF 320,000).",
+      "gap_sector": "diversification",
+      "is_overweight": false,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what specific green energy sectors or companies are you most excited about for long-term growth?",
+      "investment_signal": "The client is likely to increase their allocation to ESG and green energy investments in their portfolio.",
+      "sector": "energy",
+      "sentiment": "bullish",
+      "topic": "Clean Energy",
+      "values": [
+        "sustainability",
+        "innovation",
+        "independence"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "The portfolio has a diversification gap, with low or no exposure to green energy sectors, presenting an opportunity to further align the portfolio with Felix's values and interests.",
+      "playbook_reference": "Similar clients have successfully allocated to sustainable bond mandates and digital assets, with one recent example being the allocation of CHF 400k to green bonds within a two-week period.",
+      "portfolio_context": "Felix's portfolio currently holds 5.00% in Commodities, with a value of CHF 320,000.",
+      "suggested_follow_up": "Felix, what specific green energy sectors or companies are you most excited about for long-term growth?",
+      "summary": "Felix shared ESG content on solar energy, signaling a strong interest in sustainable investments and green technologies.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": [
+      "no_buy_advice"
+    ]
+  },
+  "scenario_issues": [],
+  "demo_ready": false
+}

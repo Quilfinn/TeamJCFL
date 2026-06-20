@@ -1,0 +1,56 @@
+{
+  "scenario_id": "clean_energy_esg",
+  "timestamp": "2026-06-20T16:51:56.338757",
+  "result": {
+    "client_card": {
+      "body": "Your interest in solar energy and allocation to green bonds demonstrates a commitment to sustainable investing, which aligns with your values of sustainability and innovation. As we continue to explore opportunities that reflect your independence and growth goals, I'd love to discuss how specific green energy sectors or companies might fit into your portfolio strategy.",
+      "cta": "Talk to Anna Keller",
+      "headline": "Green Energy Ahead",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio holds 5.00% in Commodities (CHF 320,000).",
+      "gap_sector": "diversification",
+      "is_overweight": false,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what specific green energy sectors or companies are you most interested in exploring further for your portfolio?",
+      "investment_signal": "The client is likely to increase their allocation to ESG and green energy investments in their portfolio.",
+      "sector": "energy",
+      "sentiment": "bullish",
+      "topic": "Clean Energy",
+      "values": [
+        "sustainability",
+        "innovation",
+        "independence"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "The portfolio has a diversification gap in the energy sector, presenting an opportunity to explore green energy investments further.",
+      "playbook_reference": "Similar clients have successfully allocated to sustainable bond mandates and digital assets, with a maximum 3 percent allocation to the latter.",
+      "portfolio_context": "Your portfolio currently holds 5.00% in Commodities (CHF 320,000), with a recent allocation of CHF 400k to green bonds.",
+      "suggested_follow_up": "Felix, what specific green energy sectors or companies are you most interested in exploring further for your portfolio?",
+      "summary": "Felix shared an ESG reel on solar energy, signaling a strong interest in clean energy investments that align with his values.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": [
+      "no_buy_advice"
+    ]
+  },
+  "scenario_issues": [
+    "Expected phrase missing from RM brief: 'exposure'"
+  ],
+  "demo_ready": false
+}
