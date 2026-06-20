@@ -10,11 +10,10 @@ const GAP = 5 // px between tiles
 interface Props {
   node: AssetNode
   depth: number
-  factor?: number
   onDrill: (child: AssetNode) => void
 }
 
-export function Treemap({ node, factor = 1, onDrill }: Props) {
+export function Treemap({ node, onDrill }: Props) {
   const children = node.children ?? []
   const total = children.reduce((a, c) => a + c.value, 0)
 
@@ -62,43 +61,37 @@ export function Treemap({ node, factor = 1, onDrill }: Props) {
           >
             <div className="grain-overlay" aria-hidden />
 
-            <div className="relative flex items-start justify-between gap-1">
+            <div className="relative flex min-w-0 items-start justify-between gap-1">
               <span
-                className="font-medium leading-tight"
-                style={{ fontSize: tier === 'lg' ? 15 : tier === 'md' ? 13 : 12 }}
+                className="line-clamp-2 min-w-0 font-medium leading-tight"
+                style={{ fontSize: tier === 'lg' ? 15 : tier === 'md' ? 12.5 : 11.5 }}
               >
                 {child.name}
               </span>
-              {drillable && tier !== 'sm' && (
+              {drillable && tier === 'lg' && (
                 <ChevronRight size={15} style={{ color: sub, marginTop: 1, flexShrink: 0 }} />
               )}
             </div>
 
-            <div className="relative">
-              {(() => {
-                const nodePct = child.change * factor
-                // value as of the start of the selected period (current at 1D)
-                const dispValue = (child.value * (1 + child.change / 100)) / (1 + nodePct / 100)
-                return (
-                  <div
-                    key={Math.round(dispValue)}
-                    className="tnum font-semibold leading-none"
-                    style={{
-                      fontSize: tier === 'lg' ? 19 : tier === 'md' ? 15 : 13.5,
-                      animation: 'numIn 0.45s cubic-bezier(0.22,1,0.36,1) both',
-                    }}
-                  >
-                    {formatCompact(dispValue)}
-                  </div>
-                )
-              })()}
+            <div className="relative min-w-0">
+              <div
+                key={child.value}
+                className="tnum font-light leading-none whitespace-nowrap"
+                style={{
+                  fontSize: tier === 'lg' ? 21 : tier === 'md' ? 16 : 13.5,
+                  letterSpacing: '-0.02em',
+                  animation: 'numIn 0.45s cubic-bezier(0.22,1,0.36,1) both',
+                }}
+              >
+                {formatCompact(child.value)}
+              </div>
               {tier !== 'sm' && (
                 <div
-                  className="tnum mt-1 leading-none"
+                  className="tnum mt-1 flex items-center gap-1.5 truncate leading-none"
                   style={{ fontSize: tier === 'lg' ? 11.5 : 10.5, color: sub }}
                 >
-                  {Math.round(pct)}%
-                  <span style={{ marginLeft: 6 }}>{formatPct(child.change * factor)}</span>
+                  {tier === 'lg' && <span>{Math.round(pct)}%</span>}
+                  <span>{formatPct(child.change)}</span>
                 </div>
               )}
             </div>

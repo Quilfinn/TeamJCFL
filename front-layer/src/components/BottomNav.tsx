@@ -4,10 +4,10 @@ import { ClaraAvatar } from './ClaraAvatar'
 interface Props {
   active?: string
   onChange?: (id: string) => void
-  onMic?: () => void
+  onMicDown?: () => void
 }
 
-export function BottomNav({ active = 'home', onChange, onMic }: Props) {
+export function BottomNav({ active = 'home', onChange, onMicDown }: Props) {
   return (
     <div className="flex justify-center px-5 pb-7 pt-2">
       <div
@@ -33,9 +33,9 @@ export function BottomNav({ active = 'home', onChange, onMic }: Props) {
 
         {/* big record — the hero action */}
         <button
-          onClick={onMic}
-          aria-label="Record a memo"
-          className="flex h-[54px] w-[54px] items-center justify-center rounded-full text-white transition-transform active:scale-[0.92]"
+          onPointerDown={onMicDown}
+          aria-label="Hold to record a memo"
+          className="flex h-[54px] w-[54px] touch-none items-center justify-center rounded-full text-white transition-transform active:scale-[0.92]"
           style={{
             background: 'linear-gradient(158deg, #2a64e0 0%, #11215a 100%)',
             boxShadow:

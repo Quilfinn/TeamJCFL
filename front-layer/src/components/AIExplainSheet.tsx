@@ -1,145 +1,157 @@
-import { Sparkles, BellPlus, Send, ArrowUp, TrendingUp, Mic } from 'lucide-react'
+import { useMemo, useState, type ReactNode } from 'react'
+import { X, ArrowUp, Bell, LineChart } from 'lucide-react'
 import { Sheet } from './Sheet'
-import { TikTokIcon, InstagramIcon } from './BrandIcons'
-import { formatPct } from '../lib/format'
-import type { ExplainPayload } from '../lib/explain'
+import { AIOrb } from './AIOrb'
+import { StockChart } from './StockChart'
+import { ClaraAvatar } from './ClaraAvatar'
+import { buildChart, fmtUSD } from '../lib/series'
+import type { ExplainPayload, Assessment } from '../lib/explain'
 
 interface Props {
   payload: ExplainPayload | null
   onClose: () => void
   onAsk: () => void
+  onConfirm: () => void
+  onResearch: () => void
 }
 
-const sectionStyle = (i: number) => ({
-  animation: 'riseIn 0.5s cubic-bezier(0.22,1,0.36,1) both',
-  animationDelay: `${0.08 + i * 0.08}s`,
-})
+const TFS = ['24H', '1W', '1M'] as const
 
-export function AIExplainSheet({ payload, onClose, onAsk }: Props) {
+const suggestedFor = (a: Assessment) =>
+  a === 'positive' ? 'alert' : a === 'negative' ? 'clara' : 'research'
+
+export function AIExplainSheet({ payload, onClose, onAsk, onConfirm, onResearch }: Props) {
+  const [tf, setTf] = useState<string>('24H')
+  const ticker = payload?.related?.[0]?.ticker ?? 'GLD'
+  const chart = useMemo(() => buildChart(ticker, 44, tf), [ticker, tf])
+
+  const suggested = suggestedFor(payload?.assessment ?? 'neutral')
+
+  const actions: Record<string, { primary: string; label: string; icon: ReactNode; onClick: () => void }> = {
+    alert: { primary: 'Set the alert', label: 'Set alert', icon: <Bell size={16} />, onClick: onConfirm },
+    clara: {
+      primary: 'Talk to Clara',
+      label: 'Clara',
+      icon: <ClaraAvatar size={20} />,
+      onClick: onAsk,
+    },
+    research: { primary: 'Research stocks', label: 'Research', icon: <LineChart size={16} />, onClick: onResearch },
+  }
+  const order = ['alert', 'clara', 'research']
+  const primaryKey = suggested
+  const secondaryKeys = order.filter((k) => k !== primaryKey)
+  const primary = actions[primaryKey]
+
   return (
-    <Sheet open={!!payload} onClose={onClose} variant="glass">
+    <Sheet open={!!payload} onClose={onClose} variant="light">
       {payload && (
-        <div className="px-5 pt-2 pb-6 text-white">
+        <div className="px-4 pt-3 pb-5">
           {/* header */}
-          <div className="flex items-center gap-2.5" style={sectionStyle(0)}>
-            <div
-              className="flex h-9 w-9 items-center justify-center rounded-full"
-              style={{ background: 'rgba(255,255,255,0.14)', border: '0.5px solid rgba(255,255,255,0.2)' }}
-            >
-              <Sparkles size={17} />
-            </div>
-            <div className="leading-tight">
-              <div className="text-[15px] font-semibold">Signal AI</div>
-              <div className="text-[11.5px] font-medium text-white/55">
-                {payload.source === 'yap' ? 'On your voice memo' : 'Explaining this reel for your book'}
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2.5">
+              <AIOrb size={36} float={false} />
+              <div className="leading-tight">
+                <div className="text-[15px] font-semibold text-ink">Signal AI</div>
+                <div className="text-[11.5px] font-medium text-ink-faint">
+                  {payload.source === 'yap' ? 'On your memo' : 'On this reel'}
+                </div>
               </div>
             </div>
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-ink-faint active:bg-paper-dim"
+            >
+              <X size={18} />
+            </button>
           </div>
 
-          {/* context */}
-          <div
-            className="mt-4 flex items-center gap-2 rounded-2xl px-3 py-2.5"
-            style={{ background: 'rgba(255,255,255,0.08)', ...sectionStyle(1) }}
-          >
-            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-white/12">
-              {payload.source === 'tiktok' ? (
-                <TikTokIcon size={11} />
-              ) : payload.source === 'instagram' ? (
-                <InstagramIcon size={11} />
-              ) : (
-                <Mic size={12} />
-              )}
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-[12.5px] font-medium text-white/90">
+          {/* conversation */}
+          <div className="mt-4 flex flex-col gap-2.5">
+            <div className="flex justify-end">
+              <div className="max-w-[82%] rounded-[20px] rounded-br-md bg-paper-dim px-3.5 py-2.5 text-[13.5px] leading-snug font-medium text-ink">
                 {payload.contextLabel}
               </div>
-              {payload.handle && <div className="text-[11px] text-white/50">{payload.handle}</div>}
+            </div>
+            <div className="flex justify-start">
+              <div
+                className="max-w-[86%] rounded-[20px] rounded-bl-md px-3.5 py-2.5 text-[13.5px] leading-snug text-white"
+                style={{ background: 'linear-gradient(155deg, #5f7df8, #4661e8)' }}
+              >
+                {payload.brief}
+              </div>
             </div>
           </div>
-
-          {/* the brief */}
-          <p className="mt-4 text-[15px] leading-relaxed text-white/90" style={sectionStyle(2)}>
-            {payload.brief}
-          </p>
-
-          {/* what it means for you */}
-          <div className="mt-4" style={sectionStyle(3)}>
-            <div className="mb-2 text-[12.5px] font-semibold text-white/55">What it means for you</div>
-            <ul className="flex flex-col gap-2">
-              {payload.points.map((t) => (
-                <li key={t} className="flex gap-2.5 text-[13.5px] leading-snug text-white/80">
-                  <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--color-mint)]" />
-                  {t}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* related assets */}
-          {payload.related && (
-            <div className="mt-4 flex flex-wrap gap-1.5" style={sectionStyle(4)}>
-              {payload.related.map((a) => {
-                const up = a.change >= 0
-                return (
-                  <span
-                    key={a.ticker}
-                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[12px] font-medium text-white"
-                    style={{ background: 'rgba(255,255,255,0.1)' }}
-                  >
-                    {a.ticker}
-                    <span className="tnum" style={{ color: up ? '#5fe3ab' : '#ff8b8e' }}>
-                      {formatPct(a.change)}
-                    </span>
-                  </span>
-                )
-              })}
-            </div>
-          )}
 
           {/* action card */}
           <div
-            className="mt-5 rounded-3xl p-4"
+            className="relative mt-3 overflow-hidden rounded-[26px] p-4 text-white"
             style={{
-              background: 'rgba(255,255,255,0.1)',
-              border: '0.5px solid rgba(255,255,255,0.18)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22)',
-              ...sectionStyle(5),
+              background: 'linear-gradient(160deg, #6e7cff 0%, #4f63ed 52%, #3f54df 100%)',
+              boxShadow: '0 20px 40px -18px rgba(63,84,223,0.6)',
             }}
           >
-            <div className="flex items-center gap-1.5 text-[12.5px] font-semibold text-white/55">
-              <TrendingUp size={14} /> Suggested action
+            <div className="grain-overlay" style={{ opacity: 0.07 }} aria-hidden />
+            <div className="relative text-center">
+              <div className="text-[16px] leading-snug font-semibold">{payload.suggestionTitle}</div>
+              <div className="mt-0.5 text-[12.5px] font-medium text-white/65">
+                {ticker} · alert at {fmtUSD(chart.target)}
+              </div>
             </div>
-            <div className="mt-2 text-[16px] leading-snug font-medium text-white">
-              {payload.suggestionTitle}
-              {payload.suggestionMeta && (
-                <span className="tnum text-white/60"> · {payload.suggestionMeta}</span>
-              )}
+
+            <div className="relative mt-3">
+              <StockChart data={chart.data} current={chart.current} target={chart.target} />
             </div>
-            <div className="mt-3 flex gap-2">
-              <button className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-white py-3 text-[14px] font-semibold text-navy-900 active:scale-[0.98]">
-                <BellPlus size={16} /> Set alert
-              </button>
+
+            <div className="relative mt-1 flex justify-center gap-2">
+              {TFS.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTf(t)}
+                  className="rounded-full px-2.5 py-1 text-[11.5px] font-semibold transition-colors"
+                  style={{
+                    background: t === tf ? 'rgba(255,255,255,0.22)' : 'transparent',
+                    color: t === tf ? '#fff' : 'rgba(255,255,255,0.55)',
+                  }}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+
+            {/* actions — all three present, suggested one promoted */}
+            <div className="relative mt-3 flex flex-col gap-2">
               <button
-                onClick={onAsk}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-full py-3 text-[14px] font-semibold text-white active:scale-[0.98]"
-                style={{ background: 'rgba(255,255,255,0.16)', border: '0.5px solid rgba(255,255,255,0.22)' }}
+                onClick={primary.onClick}
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-white py-3.5 text-[15px] font-semibold text-navy-800 active:scale-[0.98]"
               >
-                <Send size={15} /> Ask Clara
+                {primary.icon} {primary.primary}
               </button>
+              <div className="grid grid-cols-2 gap-2">
+                {secondaryKeys.map((k) => {
+                  const a = actions[k]
+                  return (
+                    <button
+                      key={k}
+                      onClick={a.onClick}
+                      className="flex items-center justify-center gap-2 rounded-full py-3 text-[14px] font-semibold text-white active:scale-[0.98]"
+                      style={{ background: 'rgba(255,255,255,0.16)', border: '0.5px solid rgba(255,255,255,0.24)' }}
+                    >
+                      {a.icon} {a.label}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
 
           {/* follow-up */}
-          <div
-            className="mt-4 flex items-center gap-2 rounded-full px-2 py-2"
-            style={{ background: 'rgba(255,255,255,0.1)', border: '0.5px solid rgba(255,255,255,0.16)', ...sectionStyle(6) }}
-          >
+          <div className="mt-3 flex items-center gap-2 rounded-full border border-line bg-paper px-2 py-1.5">
             <input
-              placeholder="Ask a follow-up…"
-              className="flex-1 bg-transparent px-3 text-[14px] text-white placeholder:text-white/45 focus:outline-none"
+              placeholder="Follow up…"
+              className="flex-1 bg-transparent px-3 text-[14px] text-ink placeholder:text-ink-faint focus:outline-none"
             />
-            <button className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-navy-900">
+            <button className="flex h-9 w-9 items-center justify-center rounded-full bg-navy-900 text-white">
               <ArrowUp size={17} strokeWidth={2.4} />
             </button>
           </div>
