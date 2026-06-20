@@ -1,0 +1,55 @@
+{
+  "scenario_id": "ai_infrastructure",
+  "timestamp": "2026-06-20T16:57:49.565955",
+  "result": {
+    "client_card": {
+      "body": "As you explore AI infrastructure, I noticed that your current portfolio has a relatively low exposure to this innovative sector, which could be an interesting opportunity to diversify and align with your values of innovation and legacy. I'd love to discuss how this might fit into your overall wealth strategy and explore ways to potentially incorporate it into your portfolio, would you like to talk more about it?",
+      "cta": "Talk to Anna Keller",
+      "headline": "AI Infrastructure",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio holds 20.00% in Private Equity (CHF 1,280,000).",
+      "gap_sector": "diversification",
+      "is_overweight": true,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what specific AI infrastructure companies are you considering for investment in the next quarter?",
+      "investment_signal": "The client is likely to invest in companies related to AI infrastructure, such as data centers and power grids, in 2026.",
+      "sector": "tech",
+      "sentiment": "bullish",
+      "topic": "AI Infrastructure",
+      "values": [
+        "innovation",
+        "independence",
+        "legacy"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "There is a diversification gap in the portfolio with low or no exposure to AI infrastructure, which could be an opportunity to align with Felix's values and interests",
+      "playbook_reference": "Similar clients have allocated funds to sustainable bonds and increased equity allocations after sharing relevant analysis and research",
+      "portfolio_context": "Your portfolio currently holds 20.00% in Private Equity, with CHF 1,280,000 allocated",
+      "suggested_follow_up": "Felix, what specific AI infrastructure companies are you considering for investment in the next quarter?",
+      "summary": "Felix shared an S&P 500 analysis video and later an ESG reel on solar energy, signaling his interest in innovative and sustainable technologies",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "no_buy_advice",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": []
+  },
+  "scenario_issues": [
+    "Expected phrase missing from RM brief: 'already'"
+  ],
+  "demo_ready": false
+}

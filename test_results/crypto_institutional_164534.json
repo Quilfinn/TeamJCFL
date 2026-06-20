@@ -1,0 +1,53 @@
+{
+  "scenario_id": "crypto_institutional",
+  "timestamp": "2026-06-20T16:45:34.727602",
+  "result": {
+    "client_card": {
+      "body": "As someone who values innovation and security, you may be interested in exploring how digital assets can enhance your legacy. Your current portfolio has minimal exposure to crypto, and I'd love to discuss how we can thoughtfully incorporate this sector into your overall wealth strategy.",
+      "cta": "Talk to Anna Keller",
+      "headline": "Crypto Insights",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio currently has minimal exposure to crypto.",
+      "gap_sector": "crypto",
+      "is_overweight": false,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what's your current take on the optimal allocation to digital assets for our high net worth clients?",
+      "investment_signal": "This implies a potential allocation to digital assets, such as Bitcoin, to diversify their portfolio and capitalize on the growing institutional investment trend.",
+      "sector": "crypto",
+      "sentiment": "bullish",
+      "topic": "Bitcoin Institutional Investment",
+      "values": [
+        "innovation",
+        "security",
+        "legacy"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "There is an opportunity to introduce a strategic allocation to digital assets, aligning with Felix's values of innovation and security.",
+      "playbook_reference": "Similar clients have allocated up to 3 percent of their portfolio to digital assets, following a thorough discussion of volatility and risk profile.",
+      "portfolio_context": "Your portfolio currently has minimal exposure to crypto",
+      "suggested_follow_up": "Felix, what's your current take on the optimal allocation to digital assets for our high net worth clients?",
+      "summary": "Felix shared crypto content and S&P 500 analysis, signaling a growing interest in exploring alternative assets and optimizing his portfolio.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "no_buy_advice",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": []
+  },
+  "scenario_issues": [],
+  "demo_ready": true
+}

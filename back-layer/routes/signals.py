@@ -13,8 +13,10 @@ def reel_route():
     caption     = data.get('caption', '')
     hashtags    = data.get('hashtags', [])
 
-    if not client_uuid or not caption:
-        return jsonify({'error': 'client_uuid and caption are required'}), 400
+    if not client_uuid:
+        return jsonify({'error': 'client_uuid is required'}), 400
+    if not url and not caption:
+        return jsonify({'error': 'url or caption is required'}), 400
 
     try:
         result = process_reel(client_uuid, url, caption, hashtags)

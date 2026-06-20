@@ -1,88 +1,179 @@
-import { Trash2, AudioLines, Play } from 'lucide-react'
+import { Sparkles, Send, Trash2, AudioLines } from 'lucide-react'
 import { TikTokIcon, InstagramIcon } from './BrandIcons'
-import { ClaraAvatar } from './ClaraAvatar'
-import { AgentMark } from './AgentMark'
 import type { FeedItem } from '../data/feed'
+
+const SIGNAL_COLOR: Record<string, string> = {
+  red:    '#e5484d',
+  orange: '#f59a23',
+  green:  '#16b87a',
+}
 
 interface Props {
   item: FeedItem
+  first?: boolean
   onOpen: (i: FeedItem) => void
   onExplain: (i: FeedItem) => void
   onSendRM: (i: FeedItem) => void
   onDelete: (i: FeedItem) => void
 }
 
-export function ActivityRow({ item, onOpen, onExplain, onSendRM, onDelete }: Props) {
+export function ActivityRow({ item, first, onOpen, onExplain, onSendRM, onDelete }: Props) {
+  const divider = !first && (
+    <span className="absolute top-0 right-0 left-[64px] h-px bg-[var(--color-line)]" />
+  )
+
+  /* ── RM Nudge (Anna's response) ─────────────────────────── */
+  if (item.kind === 'rm_nudge') {
+    return (
+      <div className="relative flex items-start gap-3 px-3.5 py-3">
+        {divider}
+        <button
+          onClick={() => onOpen(item)}
+          className="flex min-w-0 flex-1 items-start gap-3 text-left"
+        >
+          <div
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[14px] text-[11px] font-bold text-white"
+            style={{ background: 'linear-gradient(158deg, #3b78ec 0%, #0a1230 100%)' }}
+          >
+            AK
+          </div>
+          <div className="min-w-0 flex-1 pr-1">
+            <div className="truncate text-[13.5px] font-medium text-ink">{item.headline}</div>
+            <div className="mt-0.5 truncate text-[11.5px] font-medium text-ink-faint">
+              {item.meta}
+            </div>
+            {item.body && (
+              <div className="mt-0.5 truncate text-[11px]" style={{ color: 'var(--color-mint)' }}>
+                {item.body.slice(0, 60)}…
+              </div>
+            )}
+          </div>
+        </button>
+        <div className="flex flex-shrink-0 items-center">
+          <ActBtn label="Delete" tone="danger" onClick={() => onDelete(item)}>
+            <Trash2 size={15} strokeWidth={2} />
+          </ActBtn>
+        </div>
+      </div>
+    )
+  }
+
+  /* ── Reel & Yap ─────────────────────────────────────────── */
   const isReel = item.kind === 'reel'
-  const time = isReel
-    ? item.meta.replace(/^Forwarded from \w+ · /, '')
-    : item.meta.replace(/^Voice memo · /, '')
 
   return (
-    <div className="card overflow-hidden p-3">
-      {/* content */}
-      <button onClick={() => onOpen(item)} className="flex w-full items-start gap-3 text-left">
+    <div className="relative flex items-center gap-3 px-3.5 py-3">
+      {divider}
+
+      <button
+        onClick={() => onOpen(item)}
+        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+      >
         {isReel ? (
           <div
-            className="relative flex h-[52px] w-[52px] flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl text-white"
+            className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-[14px] text-white"
             style={{ background: `linear-gradient(150deg, ${item.poster[0]}, ${item.poster[1]})` }}
           >
             <span
               className="pointer-events-none absolute inset-0"
               style={{
                 background:
-                  'radial-gradient(90% 80% at 25% 12%, rgba(255,255,255,0.4), transparent 60%)',
+                  'radial-gradient(90% 80% at 25% 15%, rgba(255,255,255,0.4), transparent 60%)',
               }}
             />
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-              <Play size={12} className="ml-0.5 fill-white text-white" />
-            </span>
+            {item.source === 'tiktok' ? <TikTokIcon size={18} /> : <InstagramIcon size={18} />}
           </div>
         ) : (
-          <div className="flex h-[52px] w-[52px] flex-shrink-0 items-center justify-center rounded-2xl bg-[rgba(31,84,199,0.09)] text-navy-600">
-            <AudioLines size={22} />
+          <div
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[14px]"
+            style={
+              item.kind === 'yap' && item.aiReply
+                ? { background: 'rgba(22,184,122,0.12)', color: 'var(--color-mint)' }
+                : { background: 'rgba(31,84,199,0.09)', color: 'var(--color-navy-600)' }
+            }
+          >
+            {item.kind === 'yap' && item.aiReply ? <Sparkles size={18} /> : <AudioLines size={18} />}
           </div>
         )}
 
-        <div className="min-w-0 flex-1 pt-0.5">
-          <p className="line-clamp-2 text-[14px] leading-snug font-medium text-ink">
+        <div className="min-w-0 flex-1 pr-1">
+          <div className="truncate text-[13.5px] font-medium text-ink">
             {isReel ? item.caption : item.body}
-          </p>
-          <div className="mt-1.5 flex items-center gap-1.5 text-[11.5px] font-medium text-ink-faint">
-            {isReel && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-paper px-1.5 py-0.5 text-ink-soft">
-                {item.source === 'tiktok' ? <TikTokIcon size={9} /> : <InstagramIcon size={9} />}
-                {item.source === 'tiktok' ? 'TikTok' : 'Instagram'}
-              </span>
-            )}
-            {!isReel && <span className="text-ink-soft">Voice memo</span>}
-            <span>· {time}</span>
           </div>
+          <div className="mt-0.5 truncate text-[11.5px] font-medium text-ink-faint">
+            {isReel
+              ? item.handle
+              : item.kind === 'yap' && item.aiReply
+                ? 'Signal AI'
+                : 'Voice memo'}
+            {' · '}
+            {item.kind === 'reel'
+              ? item.meta.replace(/^Forwarded from \w+ · /, '')
+              : item.meta.replace(/^Voice memo · /, '').replace(/^RM Radar · /, '')}
+          </div>
+
+          {/* Signal flag chip — reels only */}
+          {isReel && item.kind === 'reel' && (
+            <div className="mt-0.5 flex items-center gap-1">
+              <span
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ background: SIGNAL_COLOR[item.signal] }}
+              />
+              <span
+                className="text-[10.5px] font-semibold"
+                style={{ color: SIGNAL_COLOR[item.signal] }}
+              >
+                {item.signalLabel}
+              </span>
+            </div>
+          )}
+
+          {/* AI reply preview — yap items */}
+          {item.kind === 'yap' && item.aiReply && (
+            <div className="mt-0.5 truncate text-[11px]" style={{ color: 'var(--color-mint)' }}>
+              {item.aiReply.slice(0, 58)}…
+            </div>
+          )}
         </div>
       </button>
 
-      {/* actions */}
-      <div className="mt-3 flex items-center gap-2">
-        <button
-          onClick={() => onExplain(item)}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-navy-900 py-2.5 text-[13px] font-semibold text-white active:scale-[0.98]"
-        >
-          <AgentMark size={16} /> Explain
-        </button>
-        <button
-          onClick={() => onSendRM(item)}
-          className="flex items-center gap-1.5 rounded-xl border border-line bg-surface py-2.5 pr-3 pl-2 text-[13px] font-medium text-ink-soft active:scale-[0.98]"
-        >
-          <ClaraAvatar size={20} /> Ask Clara
-        </button>
-        <button
-          onClick={() => onDelete(item)}
-          aria-label="Delete"
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-ink-faint transition-colors active:bg-[rgba(229,72,77,0.1)] active:text-[var(--color-rose)]"
-        >
-          <Trash2 size={16} />
-        </button>
+      <div className="flex flex-shrink-0 items-center gap-1.5">
+        <ActBtn label="Explain with AI" tone="primary" onClick={() => onExplain(item)}>
+          <Sparkles size={16} strokeWidth={2} />
+        </ActBtn>
+        <ActBtn label="Send to Clara" onClick={() => onSendRM(item)}>
+          <Send size={15} strokeWidth={2} />
+        </ActBtn>
+        <ActBtn label="Delete" tone="danger" onClick={() => onDelete(item)}>
+          <Trash2 size={15} strokeWidth={2} />
+        </ActBtn>
       </div>
     </div>
+  )
+}
+
+function ActBtn({
+  children,
+  label,
+  onClick,
+  tone = 'default',
+}: {
+  children: React.ReactNode
+  label: string
+  onClick: () => void
+  tone?: 'default' | 'primary' | 'danger'
+}) {
+  const base =
+    'flex h-9 w-9 items-center justify-center rounded-full transition-all active:scale-90 '
+  const styles =
+    tone === 'primary'
+      ? 'bg-[rgba(31,84,199,0.1)] text-navy-600 active:bg-[rgba(31,84,199,0.18)]'
+      : tone === 'danger'
+        ? 'bg-paper text-ink-faint active:bg-[rgba(229,72,77,0.1)] active:text-[var(--color-rose)]'
+        : 'bg-paper text-ink-soft active:bg-paper-dim'
+  return (
+    <button onClick={onClick} aria-label={label} className={base + styles}>
+      {children}
+    </button>
   )
 }

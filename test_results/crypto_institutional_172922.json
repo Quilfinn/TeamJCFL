@@ -1,0 +1,53 @@
+{
+  "scenario_id": "crypto_institutional",
+  "timestamp": "2026-06-20T17:29:22.231834",
+  "result": {
+    "client_card": {
+      "body": "Felix, your interest in crypto institutional adoption is noteworthy, given the current market trends. It might be worth a conversation to discuss how this could relate to your overall wealth strategy and goals.",
+      "cta": "Talk to Anna Keller",
+      "headline": "Crypto Insights",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio currently has no exposure to digital assets (crypto).",
+      "gap_sector": "crypto",
+      "is_overweight": false,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what specific allocation to digital assets do you think makes sense for your portfolio given the current market trends?",
+      "investment_signal": "The client is likely to increase their allocation to digital assets, particularly bitcoin, in their investment portfolio.",
+      "sector": "crypto",
+      "sentiment": "bullish",
+      "topic": "Crypto Institutional Adoption",
+      "values": [
+        "innovation",
+        "security",
+        "independence"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "There is no current exposure to the crypto sector, presenting a potential area for exploration.",
+      "playbook_reference": "Similar clients have explored digital assets in the context of their overall portfolio strategy.",
+      "portfolio_context": "Your portfolio currently has no exposure to digital assets (crypto). Client risk profile: aggressive (founder segment).",
+      "suggested_follow_up": "Felix Urban, considering your aggressive risk profile, I'd like to discuss how crypto might fit into your overall wealth strategy.",
+      "summary": "Felix Urban has shown interest in crypto institutional adoption, signaling a potential desire to explore new opportunities.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "no_buy_advice",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": []
+  },
+  "scenario_issues": [],
+  "demo_ready": true
+}

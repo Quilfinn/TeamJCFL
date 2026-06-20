@@ -1,0 +1,59 @@
+{
+  "scenario_id": "tech_rotation",
+  "timestamp": "2026-06-20T16:57:47.332903",
+  "result": {
+    "client_card": {
+      "body": "Felix, your interest in AI infrastructure and digital money stocks aligns with your values of innovation and speed, and considering your current portfolio allocation, it may be worth exploring how these themes can enhance your overall wealth strategy. I'd love to discuss how these emerging trends might fit into your investment approach and explore potential opportunities together.",
+      "cta": "Talk to Anna Keller",
+      "headline": "AI Innovations",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio holds 20.00% in Private Equity (CHF 1,280,000).",
+      "gap_sector": "diversification",
+      "is_overweight": true,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what specific AI infrastructure and digital money stocks are you most excited about right now?",
+      "investment_signal": "The client is likely to increase their allocation to AI and fintech stocks in the near term.",
+      "sector": "tech",
+      "sentiment": "bullish",
+      "topic": "Stocks to Buy Now",
+      "values": [
+        "innovation",
+        "speed",
+        "independence"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "The portfolio has a diversification gap, with low or no exposure to specific tech sectors that align with Felix's values and interests.",
+      "playbook_reference": "Similar clients have successfully allocated up to 3% of their portfolio to digital assets after discussing volatility and risk profiles.",
+      "portfolio_context": "Felix's portfolio currently holds 20% in Private Equity, with a recent increase of CHF 200k in equity allocation.",
+      "suggested_follow_up": "Felix, what specific AI infrastructure and digital money stocks are you most excited about right now?",
+      "summary": "Felix shared S&P 500 analysis and crypto content, signaling his interest in innovative and fast-paced sectors.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": [
+      "no_buy_advice"
+    ]
+  },
+  "scenario_issues": [
+    "Sentiment unexpected: got 'bullish' (expected one of ['cautious', 'bearish'])",
+    "Expected phrase missing from RM brief: 'concentration'",
+    "Expected phrase missing from RM brief: 'overweight'",
+    "Expected phrase missing from RM brief: 'rotation'"
+  ],
+  "demo_ready": false
+}

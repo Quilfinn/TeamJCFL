@@ -1,0 +1,54 @@
+{
+  "scenario_id": "crypto_institutional",
+  "timestamp": "2026-06-20T16:56:09.210795",
+  "result": {
+    "client_card": {
+      "body": "As someone who values innovation and security, you may be intrigued by the growing institutional investment in cryptocurrencies like Bitcoin. Considering your current portfolio has minimal exposure to crypto, it might be worth exploring how a targeted allocation could align with your legacy goals, and I'd be happy to discuss this further with you.",
+      "cta": "Talk to Anna Keller",
+      "headline": "Bitcoin's Rise",
+      "signature": "Anna Keller noticed this for you"
+    },
+    "portfolio_match": {
+      "context": "Your portfolio currently has minimal exposure to crypto.",
+      "gap_sector": "crypto",
+      "is_overweight": false,
+      "total_chf": 6400000.0
+    },
+    "profile": {
+      "follow_up_hook": "Felix, what's your current perspective on allocating a portion of your portfolio to cryptocurrencies like Bitcoin?",
+      "investment_signal": "This implies a potential increase in their wealth through strategic allocation to digital assets.",
+      "sector": "crypto",
+      "sentiment": "bullish",
+      "topic": "Bitcoin Institutional Investment",
+      "values": [
+        "innovation",
+        "security",
+        "legacy"
+      ]
+    },
+    "rm_brief": {
+      "gap_opportunity": "The portfolio has a gap in terms of crypto exposure, which could be addressed with a targeted allocation to digital assets like Bitcoin.",
+      "playbook_reference": "Similar clients have allocated up to 3 percent of their portfolio to digital assets after discussing volatility versus risk profile.",
+      "portfolio_context": "Your portfolio currently has minimal exposure to crypto, with a recent increase in equity allocation by CHF 200k.",
+      "suggested_follow_up": "Felix, what's your current perspective on allocating a portion of your portfolio to cryptocurrencies like Bitcoin?",
+      "summary": "Felix shared crypto content, signaling interest in exploring digital assets, and later shared an S&P 500 analysis video, indicating a desire to stay informed about various investment opportunities.",
+      "urgency": "medium"
+    }
+  },
+  "quality_checks": {
+    "passed": [
+      "headline_length",
+      "rm_signature",
+      "has_cta",
+      "rm_brief_complete",
+      "urgency_valid",
+      "follow_up_personal",
+      "profile_complete"
+    ],
+    "failed": [
+      "no_buy_advice"
+    ]
+  },
+  "scenario_issues": [],
+  "demo_ready": false
+}

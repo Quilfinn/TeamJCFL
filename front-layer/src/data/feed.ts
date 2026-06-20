@@ -1,4 +1,5 @@
 export type Source = 'tiktok' | 'instagram'
+export type SignalLevel = 'red' | 'orange' | 'green'
 
 export interface RelatedAsset {
   ticker: string
@@ -13,9 +14,11 @@ export interface ReelItem {
   handle: string
   caption: string
   meta: string
-  /** two-stop gradient for the poster */
   poster: [string, string]
   related: RelatedAsset[]
+  signal: SignalLevel
+  signalLabel: string
+  signalText: string
 }
 
 export interface YapItem {
@@ -23,11 +26,18 @@ export interface YapItem {
   id: string
   body: string
   meta: string
-  /** present once Signal AI has weighed in */
   aiReply?: string
 }
 
-export type FeedItem = ReelItem | YapItem
+export interface RMNudgeItem {
+  kind: 'rm_nudge'
+  id: string
+  headline: string
+  body: string
+  meta: string
+}
+
+export type FeedItem = ReelItem | YapItem | RMNudgeItem
 
 export const feed: FeedItem[] = [
   {
@@ -42,6 +52,9 @@ export const feed: FeedItem[] = [
       { ticker: 'GLD', name: 'Gold ETF', change: 1.24 },
       { ticker: 'NEM', name: 'Newmont', change: 2.01 },
     ],
+    signal: 'green',
+    signalLabel: 'Opportunity',
+    signalText: 'We noticed gold momentum aligning with your 2.2% hedge — worth exploring with Clara',
   },
   {
     kind: 'yap',
@@ -64,6 +77,9 @@ export const feed: FeedItem[] = [
       { ticker: 'TSM', name: 'TSMC', change: 1.88 },
       { ticker: 'VRT', name: 'Vertiv', change: -0.74 },
     ],
+    signal: 'orange',
+    signalLabel: 'Unclear',
+    signalText: 'Caution: mixed signals on AI capex — discuss with Clara before making any moves',
   },
   {
     kind: 'yap',
@@ -73,7 +89,6 @@ export const feed: FeedItem[] = [
   },
 ]
 
-/** Reels we can "receive" when the user shares one from TikTok/Instagram. */
 export const sampleShares: Omit<ReelItem, 'id' | 'meta'>[] = [
   {
     kind: 'reel',
@@ -85,23 +100,28 @@ export const sampleShares: Omit<ReelItem, 'id' | 'meta'>[] = [
       { ticker: 'EWJ', name: 'Japan ETF', change: -1.32 },
       { ticker: 'UUP', name: 'US Dollar', change: 0.41 },
     ],
+    signal: 'red',
+    signalLabel: 'Exit signal',
+    signalText: 'Exit risk assets now — yen carry unwind is accelerating, don\'t wait on this',
   },
   {
     kind: 'reel',
     source: 'tiktok',
     handle: '@founderfin',
-    caption: 'Private credit is eating the banks’ lunch — should you allocate?',
+    caption: 'Private credit is eating the banks\' lunch — should you allocate?',
     poster: ['#1f54c7', '#122a72'],
     related: [
       { ticker: 'ARCC', name: 'Ares Capital', change: 0.92 },
       { ticker: 'BX', name: 'Blackstone', change: 1.74 },
     ],
+    signal: 'green',
+    signalLabel: 'Opportunity',
+    signalText: 'We noticed private credit opportunity — directly addresses your alternatives gap',
   },
 ]
 
-/** Canned transcripts so the mic demo feels alive. */
 export const sampleTranscripts = [
-  'Pull up my tech exposure — feels a bit heavy after this week’s run.',
+  'Pull up my tech exposure — feels a bit heavy after this week\'s run.',
   'Can we look at adding some gold before the Fed meeting?',
   'What would it take to get my cash position down to 3%?',
 ]
