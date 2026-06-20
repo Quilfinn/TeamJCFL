@@ -18,6 +18,12 @@ interface Props {
 
 const GLASS = 'rgba(255,255,255,0.16)'
 
+const SIGNAL_HEX: Record<string, string> = {
+  red: '#ff6b6e',
+  orange: '#ffb84d',
+  green: '#5fe3ab',
+}
+
 export function ActivityDeck({ items, freshId, leavingId, onExplain, onSendRM, onFile, onDelete }: Props) {
   const [openId, setOpenId] = useState<string | null>(items[0]?.id ?? null)
   useEffect(() => {
@@ -77,6 +83,25 @@ export function ActivityDeck({ items, freshId, leavingId, onExplain, onSendRM, o
         <div className="grain-overlay" aria-hidden />
         <div className="relative px-5 pt-[18px] pb-5">
           <PassHead item={top} />
+
+          {/* Signal AI recommendation — shown once a shared reel is read */}
+          {top.kind === 'reel' && top.signal && (
+            <div
+              className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2"
+              style={{ background: 'rgba(255,255,255,0.12)', border: '0.5px solid rgba(255,255,255,0.16)' }}
+            >
+              <span className="h-2 w-2 flex-shrink-0 rounded-full" style={{ background: SIGNAL_HEX[top.signal.level] }} />
+              <span className="text-[12px] font-semibold" style={{ color: SIGNAL_HEX[top.signal.level] }}>
+                {top.signal.label}
+              </span>
+              {top.signal.note && (
+                <span className="min-w-0 flex-1 truncate text-[11.5px]" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                  · {top.signal.note}
+                </span>
+              )}
+            </div>
+          )}
+
           <div className="mt-4 flex items-center gap-2">
             <button
               onClick={() => onExplain(top)}

@@ -18,17 +18,22 @@ import { ResearchSheet } from './components/ResearchSheet'
 import { ForwardSheet } from './components/ForwardSheet'
 import { AdvisorPage } from './components/AdvisorPage'
 import { IntroSplash } from './components/IntroSplash'
+import { RMMessageCard } from './components/RMMessageCard'
 import { Toast } from './components/Toast'
+import { TikTokIcon } from './components/BrandIcons'
 import { portfolio, type AssetNode } from './data/portfolio'
 import {
   feed as initialFeed,
   initialFolders,
   FOLDER_SKINS,
+  sampleShares,
   sampleTranscripts,
   watchlist,
   type FeedItem,
   type YapItem,
+  type ReelItem,
   type RelatedAsset,
+  type SignalRec,
   type SkinKey,
   type Folder,
 } from './data/feed'
@@ -39,10 +44,19 @@ const CLIENT = { name: 'Leo', initial: 'L' }
 // Backend connection — proxied to the Flask API (see vite.config.ts).
 // Leo is the demo client; his signals surface on Anna's RM Radar dashboard.
 const API = '/api/v1'
-const FELIX_UUID = 'nqhw1mq98wkdiznouvgcjx5v420gninp'
+const CLIENT_UUID = 'nqhw1mq98wkdiznouvgcjx5v420gninp'
 
-/** Skins rotated through for freshly-recorded memos. */
+/** Skins rotated through for freshly-recorded memos / shared reels. */
 const MEMO_SKINS: SkinKey[] = ['ocean', 'petrol', 'indigo', 'steel', 'navy']
+
+// Map the AI brief's urgency to a client-friendly recommendation pill.
+const signalFromUrgency = (urgency: string | undefined, note?: string): SignalRec => {
+  if (urgency === 'high')   return { level: 'red',    label: 'Act soon', note }
+  if (urgency === 'medium') return { level: 'orange', label: 'Worth a look', note }
+  return { level: 'green', label: 'Opportunity', note }
+}
+
+interface RMMessage { id: string; headline: string; body: string }
 
 let seq = 0
 
@@ -88,6 +102,13 @@ export default function App() {
   const [intro, setIntro] = useState(true)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Messages Anna delivers after approving an opportunity on the RM dashboard.
+  const [rmMessages, setRmMessages] = useState<RMMessage[]>([])
+  const [freshMsgId, setFreshMsgId] = useState<string | null>(null)
+  const seenSent = useRef<Set<string>>(new Set())
+  const primed = useRef(false)
+  const shareCount = useRef(0)
+
   useEffect(() => {
     const t = setTimeout(() => setIntro(false), 2550)
     return () => clearTimeout(t)
@@ -101,6 +122,48 @@ export default function App() {
       body: JSON.stringify({ username: 'leo.ackermann', password: 'demo1234' }),
       credentials: 'include',
     }).catch(() => {})
+  }, [])
+
+  // Poll for opportunities Anna has approved → land them as messages from Anna.
+  useEffect(() => {
+    let active = true
+    const poll = async () => {
+      try {
+        const res = await fetch(`${API}/clients/${CLIENT_UUID}/opportunities`, {
+          credentials: 'include',
+        })
+        if (!res.ok) return
+        const data = await res.json()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const sent = (data.opportunities ?? []).filter((o: any) => o.STATUS === 'sent')
+        // First pass: remember what was already sent so only fresh approvals surface.
+        if (!primed.current) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          sent.forEach((o: any) => seenSent.current.add(String(o.ID)))
+          primed.current = true
+          return
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fresh = sent.filter((o: any) => !seenSent.current.has(String(o.ID)))
+        if (fresh.length && active) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          fresh.forEach((o: any) => seenSent.current.add(String(o.ID)))
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const msgs: RMMessage[] = fresh.map((o: any) => ({
+            id: String(o.ID),
+            headline: o.CLIENT_CARD_HEADLINE ?? 'A note from Anna',
+            body: o.CLIENT_CARD_BODY ?? '',
+          }))
+          setRmMessages((m) => [...msgs, ...m])
+          setFreshMsgId(msgs[0].id)
+          setTimeout(() => setFreshMsgId(null), 900)
+          showToast('Anna sent you a note')
+        }
+      } catch { /* ignore poll errors */ }
+    }
+    poll()
+    const iv = setInterval(poll, 2500)
+    return () => { active = false; clearInterval(iv) }
   }, [])
 
   const drill = (child: AssetNode) => {
@@ -232,7 +295,7 @@ export default function App() {
       const res = await fetch(`${API}/signals/reel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caption: ctx, client_uuid: FELIX_UUID }),
+        body: JSON.stringify({ caption: ctx, client_uuid: CLIENT_UUID }),
         credentials: 'include',
       })
       if (res.ok) {
@@ -251,6 +314,44 @@ export default function App() {
       }
     } catch {
       showToast('Sent to Clara')
+    }
+  }
+
+  // Leo shares a reel from TikTok/Instagram: it lands on his stack with a
+  // recommendation, and fires straight to Anna's RM Radar dashboard.
+  const shareReel = async () => {
+    const sample = sampleShares[shareCount.current % sampleShares.length]
+    shareCount.current += 1
+    const id = `r-${seq++}`
+    const reel: ReelItem = {
+      ...sample,
+      id,
+      meta: `Shared from ${sample.source === 'tiktok' ? 'TikTok' : 'Instagram'} · just now`,
+      status: 'new',
+      topic: '',
+      skin: MEMO_SKINS[seq % MEMO_SKINS.length],
+    }
+    setFeed((f) => [reel, ...f])
+    setFreshId(id)
+    setTimeout(() => setFreshId(null), 800)
+    showToast('Signal AI is reading your reel…')
+    try {
+      const res = await fetch(`${API}/signals/reel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caption: sample.caption, client_uuid: CLIENT_UUID }),
+        credentials: 'include',
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const sig = signalFromUrgency(data.rm_brief?.urgency, data.client_card?.headline)
+        setFeed((f) => f.map((x) => (x.id === id ? ({ ...x, signal: sig } as FeedItem) : x)))
+        showToast('Shared with Anna ✓ — she’s on it')
+      } else {
+        showToast('Shared with Anna')
+      }
+    } catch {
+      showToast('Shared with Anna')
     }
   }
 
@@ -395,12 +496,40 @@ export default function App() {
           </Section>
         </div>
 
+        {/* From Anna — messages she approved on the RM dashboard land here */}
+        {rmMessages.length > 0 && (
+          <div className="mt-7 px-5">
+            <Section title="From Anna" label="Your relationship manager">
+              <div className="space-y-3">
+                {rmMessages.map((m) => (
+                  <RMMessageCard
+                    key={m.id}
+                    headline={m.headline}
+                    body={m.body}
+                    fresh={m.id === freshMsgId}
+                    onDiscuss={() => setAdvisorOpen(true)}
+                  />
+                ))}
+              </div>
+            </Section>
+          </div>
+        )}
+
         {/* Activity */}
         <div
           className="mt-7 px-5"
           style={{ animation: 'introUp 0.95s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '2.35s' }}
         >
           <Section title="Activity" label="Activity">
+            {/* Share a reel — simulates sharing from TikTok/Instagram into Signal */}
+            <button
+              onClick={shareReel}
+              className="mb-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-[13.5px] font-semibold text-ink-soft active:scale-[0.99]"
+              style={{ border: '1px dashed var(--color-line)', background: 'var(--color-surface)' }}
+            >
+              <TikTokIcon size={15} /> Share a reel
+            </button>
+
             {stackItems.length > 0 && (
               <ActivityDeck
                 items={stackItems}

@@ -1,5 +1,13 @@
 export type Source = 'tiktok' | 'instagram'
 
+/** Signal AI's read on a shared reel — drives the recommendation pill. */
+export type SignalLevel = 'red' | 'orange' | 'green'
+export interface SignalRec {
+  level: SignalLevel
+  label: string
+  note?: string
+}
+
 /** A folder name. Folders are user-managed, so this is a free string. */
 export type Topic = string
 
@@ -56,6 +64,8 @@ export interface ReelItem extends Common {
   /** two-stop gradient for the poster */
   poster: [string, string]
   related: RelatedAsset[]
+  /** Signal AI's recommendation, attached once the reel is shared. */
+  signal?: SignalRec
 }
 
 export interface YapItem extends Common {
