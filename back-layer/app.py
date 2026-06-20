@@ -1,7 +1,11 @@
-from flask import Flask, jsonify, Response, request, send_from_directory, redirect
+from flask import Flask, jsonify, Response, request, send_from_directory, redirect, g
 from flask_cors import CORS, cross_origin
 import mysql.connector, logging, random, string, os, sys, json, hashlib
 from mysql.connector import errors
+import jwt
+import datetime
+from werkzeug.security import check_password_hash
+from functools import wraps
 
 logger = logging.getLogger("backend-app-logger")
 frontend_url = os.getenv("FRONTEND_URL")
@@ -10,6 +14,8 @@ app = Flask(__name__)
 CORS(app, support_credentials=True, resources={r"/*": {"origins": [frontend_url]}})
 
 base_path = "/api/v1/"
+
+JWT_SECRET = "l8jpXfHRZt1GaknUMG5KbWVrw162D5kbZxQphrwrURoRkHsHJ54AB1QT1hS7cLaNckVQFvNiU6K3qZhxVFZSuAlNCbFJf4ZTFXpbzbzoxnlMt1JIv50jwtyXcgOr5iHuew2q0RaoAydnFCmDFjwv5t8W6ck6GgCErdckbCtKVZ49totXoGUju9KBFLm2388up8pQjY1KWGJvrthylfyCBeHMbtWFpLEGHYdzzX44CsVBeWDrRLYXtUAAxeMzeqpH7DNXNVAQ9P24txdKDRO5lvFuUj9BCMAN4zg9lIR6SxhM8S3fWPAAeZMLBU4ykgcsIwOYWpSllxs3ZwPNk1KAcmS6PtdlO6qmZI2DPe2t2RlLJWgu3l205PAgZYVycbVn4JLJW4xHwhPhwRzByMwLiH9zuVKgD09Du9SMvCQiTrG9zHQzixGam3GhJN8xVwYFG5go8Pi2oMVmEXhGhp4EbBnRH1CZq5B1S3xs1PJ5G2mOps5kMPQMnUOz94tTNOvE"
 
 def generate_sha256(password):
     hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
@@ -43,6 +49,42 @@ def create_tables():
     cursor.execute(query_table_users)
     connection.commit()
     close_connection(connection)
+
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.cookies.get("auth_token")
+
+        if not token:
+            return jsonify({
+                "status": "error",
+                "message": "Authentication required"
+            }), 401
+
+        try:
+            payload = jwt.decode(
+                token,
+                JWT_SECRET,
+                algorithms=["HS256"]
+            )
+
+            g.user = payload
+
+        except jwt.ExpiredSignatureError:
+            return jsonify({
+                "status": "error",
+                "message": "Token expired"
+            }), 401
+
+        except jwt.InvalidTokenError:
+            return jsonify({
+                "status": "error",
+                "message": "Invalid token"
+            }), 401
+
+        return f(*args, **kwargs)
+
+    return decorated
 
 @app.route("/", methods=["GET", "POST"])
 def main_path():
@@ -91,6 +133,90 @@ def users_create_route():
             return jsonify({"status_message": "There was an error in the data processing."}), 500
 
     return jsonify({"status": "An unexpectend error happend!"}), 500
+
+@app.route(base_path + "/users/login", methods=["POST"])
+def users_login_route():
+    data = request.json
+
+    username = data.get("username")
+    password = data.get("password")
+
+    if not username or not password:
+        return jsonify({
+            "status": "error",
+            "message": "Username and password are required"
+        }), 400
+
+    connection = create_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        query = """
+            SELECT UUID, USERNAME, PASSWORD
+            FROM Users
+            WHERE USERNAME = %s
+        """
+
+        cursor.execute(query, (username,))
+        user = cursor.fetchone()
+
+        if not user:
+            return jsonify({
+                "status": "error",
+                "message": "Invalid credentials"
+            }), 401
+
+        hashed_input = generate_sha256(password)
+
+        if hashed_input != user["PASSWORD"]:
+            return jsonify({
+                "status": "error",
+                "message": "Invalid credentials"
+            }), 401
+
+        token = jwt.encode(
+            {
+                "uuid": user["UUID"],
+                "username": user["USERNAME"],
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7)
+            },
+            JWT_SECRET,
+            algorithm="HS256"
+        )
+
+        response = jsonify({
+            "status": "success"
+        })
+
+        response.set_cookie(
+            "auth_token",
+            token,
+            httponly=True,
+            secure=False,
+            samesite="Lax",
+            max_age=60 * 60 * 24 * 7
+        )
+
+        return response
+
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        return jsonify({
+            "status": "error",
+            "message": "Internal server error"
+        }), 500
+
+    finally:
+        close_connection(connection)
+
+
+@app.route(base_path + "/auth/check", methods=["GET"])
+@login_required
+def auth_check():
+    return jsonify({
+        "authenticated": True,
+        "user": g.user["username"]
+    })
 
 if __name__ == '__main__':
     create_tables()
