@@ -1,11 +1,10 @@
-from flask import Flask, jsonify, Response, request, send_from_directory, redirect, g
-from flask_cors import CORS, cross_origin
-import mysql.connector, logging, random, string, os, sys, json, hashlib
-from mysql.connector import errors
+from flask import Flask, jsonify, Response, request, g
+from flask_cors import CORS
+import logging, random, string, os, hashlib
 import jwt
 import datetime
-from werkzeug.security import check_password_hash
-from functools import wraps
+from db import create_connection, close_connection
+from auth import login_required, JWT_SECRET
 
 logger = logging.getLogger("backend-app-logger")
 frontend_url = os.getenv("FRONTEND_URL")
@@ -15,76 +14,26 @@ CORS(app, support_credentials=True, resources={r"/*": {"origins": [frontend_url]
 
 base_path = "/api/v1/"
 
-JWT_SECRET = "l8jpXfHRZt1GaknUMG5KbWVrw162D5kbZxQphrwrURoRkHsHJ54AB1QT1hS7cLaNckVQFvNiU6K3qZhxVFZSuAlNCbFJf4ZTFXpbzbzoxnlMt1JIv50jwtyXcgOr5iHuew2q0RaoAydnFCmDFjwv5t8W6ck6GgCErdckbCtKVZ49totXoGUju9KBFLm2388up8pQjY1KWGJvrthylfyCBeHMbtWFpLEGHYdzzX44CsVBeWDrRLYXtUAAxeMzeqpH7DNXNVAQ9P24txdKDRO5lvFuUj9BCMAN4zg9lIR6SxhM8S3fWPAAeZMLBU4ykgcsIwOYWpSllxs3ZwPNk1KAcmS6PtdlO6qmZI2DPe2t2RlLJWgu3l205PAgZYVycbVn4JLJW4xHwhPhwRzByMwLiH9zuVKgD09Du9SMvCQiTrG9zHQzixGam3GhJN8xVwYFG5go8Pi2oMVmEXhGhp4EbBnRH1CZq5B1S3xs1PJ5G2mOps5kMPQMnUOz94tTNOvE"
-
 def generate_sha256(password):
-    hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
-    return hashed_password
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
 def generate_uuid():
     segments = [8, 8, 8, 8]
-
     return ''.join(''.join(random.choices(string.ascii_lowercase + string.digits, k=length)) for length in segments)
-
-def create_connection():
-    try:
-        connection = mysql.connector.connect(host='back-layer-db-1', database='data', user='root', password='qVNDLwAUbpJS7DP9N8RSfhdnCM2DBpW5')
-
-        if connection.is_connected():
-            logger.debug("Connected to MySQL")
-            return connection
-    except errors as e:
-        logger.critical(f"Error creating MySQL connection: {e}")
-        return None
-
-def close_connection(connection):
-    if connection.is_connected():
-        connection.close()
-        logger.debug("Connection to MySQL closed")
 
 def create_tables():
     connection = create_connection()
     cursor = connection.cursor()
-    query_table_users = "CREATE TABLE IF NOT EXISTS Users (UUID VARCHAR(255) NOT NULL, USERNAME VARCHAR(255) UNIQUE NOT NULL, FIRSTNAME VARCHAR(255) NOT NULL, LASTNAME VARCHAR(255) NOT NULL, EMAIL VARCHAR(255) UNIQUE NOT NULL, PASSWORD VARCHAR(4000) NOT NULL, ACCOUNT_TYPE VARCHAR(255), CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP, EMAIL_CODE VARCHAR(255))" # ACCOUNT_TYPE VARCHAR(255) NOT NULL
-    cursor.execute(query_table_users)
+    cursor.execute(
+        "CREATE TABLE IF NOT EXISTS Users ("
+        "UUID VARCHAR(255) NOT NULL, USERNAME VARCHAR(255) UNIQUE NOT NULL, "
+        "FIRSTNAME VARCHAR(255) NOT NULL, LASTNAME VARCHAR(255) NOT NULL, "
+        "EMAIL VARCHAR(255) UNIQUE NOT NULL, PASSWORD VARCHAR(4000) NOT NULL, "
+        "ACCOUNT_TYPE VARCHAR(255), CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP, "
+        "EMAIL_CODE VARCHAR(255))"
+    )
     connection.commit()
     close_connection(connection)
-
-def login_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.cookies.get("auth_token")
-
-        if not token:
-            return jsonify({
-                "status": "error",
-                "message": "Authentication required"
-            }), 401
-
-        try:
-            payload = jwt.decode(
-                token,
-                JWT_SECRET,
-                algorithms=["HS256"]
-            )
-
-            g.user = payload
-
-        except jwt.ExpiredSignatureError:
-            return jsonify({
-                "status": "error",
-                "message": "Token expired"
-            }), 401
-
-        except jwt.InvalidTokenError:
-            return jsonify({
-                "status": "error",
-                "message": "Invalid token"
-            }), 401
-
-        return f(*args, **kwargs)
-
-    return decorated
 
 @app.route("/", methods=["GET", "POST"])
 def main_path():
@@ -96,16 +45,20 @@ def base_path_route():
 
 @app.route(base_path + "health")
 def health_route():
+    connection = None
     try:
         connection = create_connection()
-        cursor = connection.cursor()
+        if not connection:
+            return Response(status=500)
+        connection.cursor()
         return Response(status=200)
-    except errors:
+    except Exception:
         return Response(status=500)
     finally:
-        close_connection(connection)
+        if connection:
+            close_connection(connection)
 
-@app.route(base_path + "/users/create", methods=["POST"])
+@app.route(base_path + "users/create", methods=["POST"])
 def users_create_route():
     data = request.json
 
@@ -128,15 +81,13 @@ def users_create_route():
         connection.commit()
         close_connection(connection)
         return jsonify({"status": "user_created_successfully"}), 201
-    except errors.IntegrityError as e:
-        if e.errno == 1062:
+    except Exception as e:
+        errno = getattr(e, 'errno', None)
+        if errno == 1062:
             return jsonify({"status_message": "The username or email already exists. Please choose a different."}), 400
-        else:
-            return jsonify({"status_message": "There was an error in the data processing."}), 500
+        return jsonify({"status_message": "There was an error in the data processing."}), 500
 
-    return jsonify({"status": "An unexpectend error happend!"}), 500
-
-@app.route(base_path + "/users/login", methods=["POST"])
+@app.route(base_path + "users/login", methods=["POST"])
 def users_login_route():
     data = request.json
 
@@ -213,7 +164,7 @@ def users_login_route():
     finally:
         close_connection(connection)
 
-@app.route(base_path + "/users/logout", methods=["POST"])
+@app.route(base_path + "users/logout", methods=["POST"])
 @login_required
 def users_logout_route():
     response = jsonify({
@@ -232,6 +183,18 @@ def users_logout_route():
 #         "user": g.user["username"]
 #     })
 
+# ── RM Radar AI layer ──────────────────────────────
+from db import init_ai_tables
+from routes.signals import signals_bp
+from routes.clients import clients_bp
+from routes.opportunities import opportunities_bp
+
+app.register_blueprint(signals_bp)
+app.register_blueprint(clients_bp)
+app.register_blueprint(opportunities_bp)
+# ───────────────────────────────────────────────────
+
 if __name__ == '__main__':
     create_tables()
+    init_ai_tables()
     app.run(host="0.0.0.0", port=8484, threaded=True)

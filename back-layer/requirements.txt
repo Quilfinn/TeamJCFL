@@ -3,3 +3,6 @@ flask_cors
 mysql-connector-python
 python-dotenv
 PyJWT
+requests
+groq
+chromadb
