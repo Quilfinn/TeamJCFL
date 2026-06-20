@@ -45,7 +45,7 @@ def close_connection(connection):
 def create_tables():
     connection = create_connection()
     cursor = connection.cursor()
-    query_table_users = "CREATE TABLE IF NOT EXISTS Users (UUID VARCHAR(255) NOT NULL, USERNAME VARCHAR(255) UNIQUE NOT NULL, FIRSTNAME VARCHAR(255) NOT NULL, LASTNAME VARCHAR(255) NOT NULL, EMAIL VARCHAR(255) UNIQUE NOT NULL, PASSWORD VARCHAR(4000) NOT NULL, CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP, EMAIL_CODE VARCHAR(255))"
+    query_table_users = "CREATE TABLE IF NOT EXISTS Users (UUID VARCHAR(255) NOT NULL, USERNAME VARCHAR(255) UNIQUE NOT NULL, FIRSTNAME VARCHAR(255) NOT NULL, LASTNAME VARCHAR(255) NOT NULL, EMAIL VARCHAR(255) UNIQUE NOT NULL, PASSWORD VARCHAR(4000) NOT NULL, ACCOUNT_TYPE VARCHAR(255), CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP, EMAIL_CODE VARCHAR(255))" # ACCOUNT_TYPE VARCHAR(255) NOT NULL
     cursor.execute(query_table_users)
     connection.commit()
     close_connection(connection)
@@ -100,9 +100,10 @@ def health_route():
         connection = create_connection()
         cursor = connection.cursor()
         return Response(status=200)
-        close_connection(connection)
     except errors:
         return Response(status=500)
+    finally:
+        close_connection(connection)
 
 @app.route(base_path + "/users/create", methods=["POST"])
 def users_create_route():
@@ -111,11 +112,12 @@ def users_create_route():
     connection = create_connection()
     cursor = connection.cursor()
 
-    username = data["username"]
-    firstname = data["firstname"]
-    lastname = data["lastname"]
-    email = data["email"]
-    password = generate_sha256(data["password"])
+    username = data.get("username")
+    firstname = data.get("firstname")
+    lastname = data.get("lastname")
+    email = data.get("email")
+    password = generate_sha256(data.get("password"))
+    account_type = "CLIENT"
         
     line = (generate_uuid(), username, firstname, lastname, email, password)
 
@@ -152,7 +154,7 @@ def users_login_route():
 
     try:
         query = """
-            SELECT UUID, USERNAME, PASSWORD
+            SELECT UUID, USERNAME, PASSWORD, ACCOUNT_TYPE, EMAIL
             FROM Users
             WHERE USERNAME = %s
         """
@@ -178,6 +180,8 @@ def users_login_route():
             {
                 "uuid": user["UUID"],
                 "username": user["USERNAME"],
+                "account_type": user["ACCOUNT_TYPE"],
+                "email": user["EMAIL"],
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7)
             },
             JWT_SECRET,
@@ -209,14 +213,24 @@ def users_login_route():
     finally:
         close_connection(connection)
 
-
-@app.route(base_path + "/auth/check", methods=["GET"])
+@app.route(base_path + "/users/logout", methods=["POST"])
 @login_required
-def auth_check():
-    return jsonify({
-        "authenticated": True,
-        "user": g.user["username"]
+def users_logout_route():
+    response = jsonify({
+        "status": "success"
     })
+
+    response.delete_cookie("auth_token")
+
+    return response, 200
+
+# @app.route(base_path + "/auth/check", methods=["GET"])
+# @login_required
+# def auth_check():
+#     return jsonify({
+#         "authenticated": True,
+#         "user": g.user["username"]
+#     })
 
 if __name__ == '__main__':
     create_tables()
