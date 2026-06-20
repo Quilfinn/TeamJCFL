@@ -7,24 +7,37 @@ import { BalanceCard } from './components/BalanceCard'
 import { Section } from './components/Section'
 import { Treemap } from './components/Treemap'
 import { Timeframes, TIMEFRAMES } from './components/Timeframes'
-import { ActivityRow } from './components/ActivityRow'
+import { ActivityDeck } from './components/ActivityDeck'
+import { Folders } from './components/Folders'
+import { FolderSheet } from './components/FolderSheet'
+import { MoveSheet } from './components/MoveSheet'
+import { CreateFolderSheet } from './components/CreateFolderSheet'
 import { RecordingDrawer } from './components/RecordingDrawer'
 import { AIExplainSheet } from './components/AIExplainSheet'
 import { ResearchSheet } from './components/ResearchSheet'
 import { ForwardSheet } from './components/ForwardSheet'
 import { AdvisorPage } from './components/AdvisorPage'
+import { IntroSplash } from './components/IntroSplash'
 import { Toast } from './components/Toast'
 import { portfolio, type AssetNode } from './data/portfolio'
 import {
   feed as initialFeed,
+  initialFolders,
+  FOLDER_SKINS,
   sampleTranscripts,
+  watchlist,
   type FeedItem,
   type YapItem,
   type RelatedAsset,
+  type SkinKey,
+  type Folder,
 } from './data/feed'
 import { buildExplain, type ExplainPayload } from './lib/explain'
 
 const CLIENT = { name: 'Felix', initial: 'F' }
+
+/** Skins rotated through for freshly-recorded memos. */
+const MEMO_SKINS: SkinKey[] = ['ocean', 'petrol', 'indigo', 'steel', 'navy']
 
 let seq = 0
 
@@ -40,13 +53,40 @@ export default function App() {
   const delta = (current.value * pct) / 100
 
   const [feed, setFeed] = useState<FeedItem[]>(initialFeed)
+  const [folders, setFolders] = useState<Folder[]>(initialFolders)
+  const [openFolder, setOpenFolder] = useState<string | null>(null)
+  const [moveItem, setMoveItem] = useState<FeedItem | null>(null)
+  const [creating, setCreating] = useState<{ item: FeedItem | null } | null>(null)
+  const [freshId, setFreshId] = useState<string | null>(null)
+  const [leavingId, setLeavingId] = useState<string | null>(null)
+
+  // the stack holds anything not yet filed; folders are managed by hand
+  const stackItems = feed.filter((i) => i.status === 'new')
+  const itemsIn = (name: string) => feed.filter((i) => i.status === 'filed' && i.topic === name)
+  const foldersData = folders.map((f) => ({ ...f, items: itemsIn(f.name) }))
+  const openFolderData = (() => {
+    const f = folders.find((x) => x.name === openFolder)
+    return f ? { ...f, items: itemsIn(f.name) } : null
+  })()
+
   const [recording, setRecording] = useState(false)
+  const [recPhase, setRecPhase] = useState<'listening' | 'processing'>('listening')
   const [explain, setExplain] = useState<ExplainPayload | null>(null)
-  const [research, setResearch] = useState<RelatedAsset[] | null>(null)
+  const [stockSheet, setStockSheet] = useState<{
+    assets: RelatedAsset[]
+    title: string
+    subtitle: string
+  } | null>(null)
   const [askContext, setAskContext] = useState<string | null>(null)
   const [advisorOpen, setAdvisorOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [intro, setIntro] = useState(true)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    const t = setTimeout(() => setIntro(false), 2550)
+    return () => clearTimeout(t)
+  }, [])
 
   const drill = (child: AssetNode) => {
     if (child.children?.length) setPath((p) => [...p, child])
@@ -72,19 +112,74 @@ export default function App() {
     setExplain(null)
     setAskContext(item.kind === 'reel' ? item.caption : item.body)
   }
-  const doDelete = (item: FeedItem) => {
-    setFeed((f) => f.filter((x) => x.id !== item.id))
-    showToast('Removed from your activity')
+  // animate a stack card off to the right, then run the state change
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const exitThen = (id: string, fn: () => void) => {
+    setLeavingId(id)
+    if (leaveTimer.current) clearTimeout(leaveTimer.current)
+    leaveTimer.current = setTimeout(() => {
+      fn()
+      setLeavingId(null)
+    }, 330)
   }
 
+  const doDelete = (item: FeedItem) => {
+    exitThen(item.id, () => {
+      setFeed((f) => f.filter((x) => x.id !== item.id))
+      showToast('Removed from your activity')
+    })
+  }
+  // filing is now by hand — open the folder picker
+  const doFile = (item: FeedItem) => setMoveItem(item)
+
+  const fileInto = (item: FeedItem, name: string) => {
+    setMoveItem(null)
+    exitThen(item.id, () => {
+      setFeed((f) => f.map((x) => (x.id === item.id ? ({ ...x, status: 'filed', topic: name } as FeedItem) : x)))
+      showToast(`Moved to ${name}`)
+    })
+  }
+  const unfile = (item: FeedItem) => {
+    setFeed((f) => f.map((x) => (x.id === item.id ? ({ ...x, status: 'new', topic: '' } as FeedItem) : x)))
+    showToast('Moved back to your stack')
+  }
+  const createFolder = (name: string) => {
+    const forItem = creating?.item ?? null
+    setCreating(null)
+    setFolders((fs) =>
+      fs.some((f) => f.name.toLowerCase() === name.toLowerCase())
+        ? fs
+        : [...fs, { name, skin: FOLDER_SKINS[fs.length % FOLDER_SKINS.length] }],
+    )
+    if (forItem) fileInto(forItem, name)
+    else showToast(`Folder “${name}” created`)
+  }
+
+  // mic released → transcribe (brief), drop the card onto the stack, then let Signal weigh in
   const stopRecording = () => {
-    setRecording(false)
-    const id = `y-${seq++}`
-    const body = sampleTranscripts[seq % sampleTranscripts.length]
-    const memo: YapItem = { kind: 'yap', id, body, meta: 'Voice memo · just now' }
-    setFeed((f) => [memo, ...f])
-    // new event → open the AI explainer directly
-    doExplain(memo)
+    setRecPhase('processing')
+    setTimeout(() => {
+      const id = `y-${seq++}`
+      const body = sampleTranscripts[seq % sampleTranscripts.length]
+      const memo: YapItem = {
+        kind: 'yap',
+        id,
+        body,
+        meta: 'Voice memo · just now',
+        status: 'new',
+        topic: '',
+        skin: MEMO_SKINS[seq % MEMO_SKINS.length],
+      }
+      setFeed((f) => [memo, ...f])
+      setFreshId(id)
+      setRecording(false)
+      setRecPhase('listening')
+      // let the card settle on the stack before the agent opens
+      setTimeout(() => {
+        doExplain(memo)
+        setFreshId(null)
+      }, 760)
+    }, 1050)
   }
 
   // tap opens the recorder; press-and-hold records while held, release to capture
@@ -140,8 +235,34 @@ export default function App() {
           />
           <RecordingDrawer
             open={recording}
+            phase={recPhase}
             onStop={stopRecording}
             onCancel={() => setRecording(false)}
+          />
+          <FolderSheet
+            folder={openFolderData}
+            onClose={() => setOpenFolder(null)}
+            onOpen={(it) => {
+              setOpenFolder(null)
+              doExplain(it)
+            }}
+            onRemove={unfile}
+          />
+          <MoveSheet
+            item={moveItem}
+            folders={foldersData.map((f) => ({ name: f.name, skin: f.skin, count: f.items.length }))}
+            onPick={(name) => moveItem && fileInto(moveItem, name)}
+            onCreate={() => {
+              const it = moveItem
+              setMoveItem(null)
+              setCreating({ item: it })
+            }}
+            onClose={() => setMoveItem(null)}
+          />
+          <CreateFolderSheet
+            open={!!creating}
+            onCreate={createFolder}
+            onClose={() => setCreating(null)}
           />
           <AIExplainSheet
             payload={explain}
@@ -155,20 +276,38 @@ export default function App() {
               setExplain(null)
               showToast('Price alert set — Clara is in the loop')
             }}
-            onResearch={() => setResearch(explain?.related ?? [])}
+            onResearch={() =>
+              setStockSheet({
+                assets: explain?.related ?? [],
+                title: 'Research',
+                subtitle: 'Names tied to this idea',
+              })
+            }
           />
-          <ResearchSheet assets={research} onClose={() => setResearch(null)} />
+          <ResearchSheet
+            assets={stockSheet?.assets ?? null}
+            title={stockSheet?.title}
+            subtitle={stockSheet?.subtitle}
+            onClose={() => setStockSheet(null)}
+          />
           <ForwardSheet context={askContext} onClose={() => setAskContext(null)} onSent={askSent} />
           <Toast message={toast} />
+          {intro && <IntroSplash name={CLIENT.name} />}
         </>
       }
     >
       <div className="pb-32">
-        <Greeting name={CLIENT.name} initial={CLIENT.initial} />
+        <Greeting
+          name={CLIENT.name}
+          initial={CLIENT.initial}
+          onWatchlist={() =>
+            setStockSheet({ assets: watchlist, title: 'Watchlist', subtitle: 'Names you’re tracking' })
+          }
+        />
 
         <div
           className="px-5"
-          style={{ animation: 'introUp 0.8s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '0.1s' }}
+          style={{ animation: 'introUp 0.95s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '1.75s' }}
         >
           <BalanceCard node={current} atRoot={atRoot} pct={pct} delta={delta} periodLabel={periodLabel} />
         </div>
@@ -176,7 +315,7 @@ export default function App() {
         {/* timeframe — above the portfolio, controls the card + bento */}
         <div
           className="mt-4 px-5"
-          style={{ animation: 'introUp 0.8s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '0.15s' }}
+          style={{ animation: 'introUp 0.95s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '1.95s' }}
         >
           <Timeframes active={tf} onChange={setTf} />
         </div>
@@ -184,7 +323,7 @@ export default function App() {
         {/* Portfolio */}
         <div
           className="mt-6 px-5"
-          style={{ animation: 'introUp 0.8s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '0.2s' }}
+          style={{ animation: 'introUp 0.95s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '2.15s' }}
         >
           <Section
             label="Portfolio"
@@ -215,30 +354,28 @@ export default function App() {
         {/* Activity */}
         <div
           className="mt-7 px-5"
-          style={{ animation: 'introUp 0.8s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '0.26s' }}
+          style={{ animation: 'introUp 0.95s cubic-bezier(0.16,1,0.3,1) both', animationDelay: '2.35s' }}
         >
           <Section title="Activity" label="Activity">
-            {feed.length ? (
-              <div className="flex flex-col gap-2.5">
-                {feed.map((item) => (
-                  <ActivityRow
-                    key={item.id}
-                    item={item}
-                    onOpen={(it) => doExplain(it)}
-                    onExplain={(it) => doExplain(it)}
-                    onSendRM={doSendRM}
-                    onDelete={doDelete}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="card flex flex-col items-center gap-1 px-4 py-12 text-center">
-                <div className="text-[14px] font-medium text-ink">Nothing here yet</div>
-                <div className="text-[12.5px] text-ink-faint">
-                  Tap the mic to record a memo, or share a reel into Signal
-                </div>
-              </div>
+            {stackItems.length > 0 && (
+              <ActivityDeck
+                items={stackItems}
+                freshId={freshId}
+                leavingId={leavingId}
+                onExplain={doExplain}
+                onSendRM={doSendRM}
+                onFile={doFile}
+                onDelete={doDelete}
+              />
             )}
+
+            <div className={stackItems.length > 0 ? 'mt-8' : ''}>
+              <Folders
+                folders={foldersData}
+                onOpen={setOpenFolder}
+                onCreate={() => setCreating({ item: null })}
+              />
+            </div>
           </Section>
         </div>
       </div>

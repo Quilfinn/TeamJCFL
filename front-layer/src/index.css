@@ -162,10 +162,31 @@ body {
 /* Entrance — transform-only (safe), smooth expo ease */
 @keyframes introUp {
   from {
-    transform: translateY(16px);
+    transform: translateY(26px);
   }
   to {
     transform: translateY(0);
+  }
+}
+
+/* Intro splash: white screen with the greeting, then lifts away */
+@keyframes splashOut {
+  0%,
+  60% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+}
+@keyframes splashText {
+  from {
+    transform: translateY(16px) scale(0.94);
+  }
+  to {
+    transform: translateY(0) scale(1);
   }
 }
 @keyframes introPop {
@@ -226,6 +247,41 @@ body {
 @keyframes drawLine {
   to {
     stroke-dashoffset: 0;
+  }
+}
+
+/* A freshly-landed pass drops onto the stack (transform-only) */
+@keyframes deckDrop {
+  from {
+    transform: translateY(-26px) scale(0.94);
+  }
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Folder cards fan up into view, staggered (transform-only) */
+@keyframes fanUp {
+  from {
+    transform: translateY(34px) scale(0.97);
+  }
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* A pass swiped off the stack (filed or deleted) */
+@keyframes cardLeave {
+  to {
+    transform: translateX(46px) scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* Soft processing spinner for the recorder hand-off */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
