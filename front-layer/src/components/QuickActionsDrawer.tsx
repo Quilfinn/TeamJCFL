@@ -1,9 +1,8 @@
 import { motion } from 'framer-motion'
-import { Sparkles, Send, RotateCcw, Trash2, AudioLines } from 'lucide-react'
+import { Sparkles, Send, RotateCcw, Trash2, AudioLines, Play } from 'lucide-react'
 import { Sheet } from './Sheet'
 import { TikTokIcon, InstagramIcon } from './BrandIcons'
 import type { FeedItem } from '../data/feed'
-import { formatPct } from '../lib/format'
 
 interface Props {
   item: FeedItem | null
@@ -39,43 +38,35 @@ export function QuickActionsDrawer({
 
           {/* preview */}
           {isReel ? (
-            <div className="overflow-hidden rounded-2xl border border-line">
-              <div
-                className="relative flex aspect-[16/9] items-end p-3"
-                style={{ background: `linear-gradient(150deg, ${item.poster[0]}, ${item.poster[1]})` }}
-              >
-                <span className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-black/25 px-2 py-1 text-[11px] font-medium text-white">
-                  {item.source === 'tiktok' ? <TikTokIcon size={11} /> : <InstagramIcon size={11} />}
-                  {item.source === 'tiktok' ? 'TikTok' : 'Instagram'}
-                </span>
-                <div className="relative">
-                  <div className="text-[11px] font-medium text-white/70">{item.handle}</div>
-                  <p className="text-[13.5px] leading-snug font-medium text-white">{item.caption}</p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-1.5 bg-surface px-3 py-2.5">
-                {item.related.map((a) => {
-                  const up = a.change >= 0
-                  return (
-                    <span
-                      key={a.ticker}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-line bg-paper px-2 py-1 text-[11.5px] font-medium text-ink"
-                    >
-                      {a.ticker}
-                      <span className="tnum" style={{ color: up ? 'var(--color-mint)' : 'var(--color-rose)' }}>
-                        {formatPct(a.change)}
-                      </span>
-                    </span>
-                  )
-                })}
+            <div
+              className="relative flex aspect-[16/10] items-end overflow-hidden rounded-2xl p-3.5 text-white"
+              style={{ background: `linear-gradient(150deg, ${item.poster[0]}, ${item.poster[1]})` }}
+            >
+              <span
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background:
+                    'radial-gradient(80% 70% at 22% 12%, rgba(255,255,255,0.32), transparent 55%), linear-gradient(180deg, transparent 45%, rgba(7,13,31,0.55))',
+                }}
+              />
+              <span className="absolute top-3.5 left-3.5 inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 text-[11.5px] font-medium backdrop-blur-sm">
+                {item.source === 'tiktok' ? <TikTokIcon size={12} /> : <InstagramIcon size={12} />}
+                {item.source === 'tiktok' ? 'TikTok' : 'Instagram'}
+              </span>
+              <span className="absolute top-3 right-3.5 flex h-9 w-9 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm">
+                <Play size={14} className="ml-0.5 fill-white text-white" />
+              </span>
+              <div className="relative">
+                <div className="text-[11.5px] font-medium text-white/75">{item.handle}</div>
+                <p className="text-[14px] leading-snug font-medium">{item.caption}</p>
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl border border-line bg-paper p-3.5">
+            <div className="rounded-2xl border border-line bg-paper p-4">
               <div className="flex items-center gap-2 text-[12px] font-medium text-ink-faint">
                 <AudioLines size={15} className="text-navy-600" /> {item.meta}
               </div>
-              <p className="mt-2 text-[14.5px] leading-snug text-ink">{item.body}</p>
+              <p className="mt-2 text-[15px] leading-snug text-ink">“{item.body}”</p>
             </div>
           )}
 
@@ -89,7 +80,7 @@ export function QuickActionsDrawer({
           </motion.button>
 
           <div className="mt-2 grid grid-cols-2 gap-2">
-            <Secondary icon={<Send size={16} />} label="Send to RM" onClick={() => onSendRM(item)} />
+            <Secondary icon={<Send size={16} />} label="Send to Clara" onClick={() => onSendRM(item)} />
             {item.kind === 'yap' ? (
               <Secondary icon={<RotateCcw size={16} />} label="Record again" onClick={onRecordAgain} />
             ) : (

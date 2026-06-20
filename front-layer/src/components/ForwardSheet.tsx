@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Send } from 'lucide-react'
 import { Sheet } from './Sheet'
+import { ClaraAvatar } from './ClaraAvatar'
 
 interface Props {
   context: string | null
@@ -18,13 +19,11 @@ export function ForwardSheet({ context, onClose, onSent }: Props) {
     <Sheet open={!!context} onClose={onClose} variant="light">
       <div className="px-5 pt-2 pb-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-navy-900 text-[14px] font-semibold text-white">
-            CB
-          </div>
+          <ClaraAvatar size={44} />
           <div className="leading-tight">
-            <div className="text-[15px] font-semibold text-ink">Ask Clara</div>
+            <div className="text-[15px] font-semibold text-ink">Send to Clara</div>
             <div className="text-[12px] font-medium text-ink-faint">
-              Your relationship manager · usually replies in ~1h
+              Clara Bensimon · your relationship manager
             </div>
           </div>
         </div>

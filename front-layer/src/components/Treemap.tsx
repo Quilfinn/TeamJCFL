@@ -10,10 +10,11 @@ const GAP = 5 // px between tiles
 interface Props {
   node: AssetNode
   depth: number
+  factor?: number
   onDrill: (child: AssetNode) => void
 }
 
-export function Treemap({ node, onDrill }: Props) {
+export function Treemap({ node, factor = 1, onDrill }: Props) {
   const children = node.children ?? []
   const total = children.reduce((a, c) => a + c.value, 0)
 
@@ -74,19 +75,30 @@ export function Treemap({ node, onDrill }: Props) {
             </div>
 
             <div className="relative">
-              <div
-                className="tnum font-semibold leading-none"
-                style={{ fontSize: tier === 'lg' ? 19 : tier === 'md' ? 15 : 13.5 }}
-              >
-                {formatCompact(child.value)}
-              </div>
+              {(() => {
+                const nodePct = child.change * factor
+                // value as of the start of the selected period (current at 1D)
+                const dispValue = (child.value * (1 + child.change / 100)) / (1 + nodePct / 100)
+                return (
+                  <div
+                    key={Math.round(dispValue)}
+                    className="tnum font-semibold leading-none"
+                    style={{
+                      fontSize: tier === 'lg' ? 19 : tier === 'md' ? 15 : 13.5,
+                      animation: 'numIn 0.45s cubic-bezier(0.22,1,0.36,1) both',
+                    }}
+                  >
+                    {formatCompact(dispValue)}
+                  </div>
+                )
+              })()}
               {tier !== 'sm' && (
                 <div
                   className="tnum mt-1 leading-none"
                   style={{ fontSize: tier === 'lg' ? 11.5 : 10.5, color: sub }}
                 >
                   {Math.round(pct)}%
-                  {tier === 'lg' && <span style={{ marginLeft: 6 }}>{formatPct(child.change)}</span>}
+                  <span style={{ marginLeft: 6 }}>{formatPct(child.change * factor)}</span>
                 </div>
               )}
             </div>

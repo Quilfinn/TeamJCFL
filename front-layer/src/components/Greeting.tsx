@@ -5,14 +5,27 @@ function partOfDay(): string {
   return 'Good evening'
 }
 
+const reveal = (delay: number) => ({
+  display: 'inline-block',
+  animation: 'introUp 0.7s cubic-bezier(0.34,1.56,0.64,1) both',
+  animationDelay: `${delay}s`,
+})
+
 export function Greeting({ name, initial }: { name: string; initial: string }) {
   return (
     <div className="flex items-center justify-between px-6 pt-1 pb-3">
-      <div className="leading-tight">
-        <div className="text-[13px] font-medium text-ink-faint">{partOfDay()},</div>
-        <div className="text-[19px] font-semibold tracking-tight text-ink">{name}</div>
+      <div className="text-[18px] tracking-tight">
+        <span className="font-medium text-ink-faint" style={reveal(0.02)}>
+          {partOfDay()},{' '}
+        </span>
+        <span className="font-semibold text-ink" style={reveal(0.12)}>
+          {name}.
+        </span>
       </div>
-      <button className="relative flex h-10 w-10 items-center justify-center rounded-full bg-paper-dim text-[14px] font-semibold text-ink-soft">
+      <button
+        className="relative flex h-10 w-10 items-center justify-center rounded-full bg-paper-dim text-[14px] font-semibold text-ink-soft"
+        style={{ animation: 'introPop 0.6s cubic-bezier(0.34,1.56,0.64,1) both', animationDelay: '0.18s' }}
+      >
         {initial}
         <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-paper bg-navy-500" />
       </button>

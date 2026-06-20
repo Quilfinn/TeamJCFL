@@ -158,3 +158,44 @@ body {
     transform: scale(1);
   }
 }
+
+/* Greeting intro — transform-only (safe) with an overshoot for life */
+@keyframes introUp {
+  from {
+    transform: translateY(20px) scale(0.94);
+  }
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes introPop {
+  from {
+    transform: scale(0.3) rotate(-12deg);
+  }
+  to {
+    transform: scale(1) rotate(0);
+  }
+}
+
+/* Slide a full page in from the right */
+@keyframes pageIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Breathing blue glow for the recorder */
+@keyframes glowPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.95;
+  }
+}

@@ -1,12 +1,12 @@
-export function TikTokIcon({ size = 12 }: { size?: number }) {
+export function TikTokIcon({ size = 14 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M16.6 5.82a4.28 4.28 0 0 1-1.06-2.82h-3.2v12.86a2.34 2.34 0 1 1-2.34-2.34c.2 0 .4.03.59.08V8.3a5.66 5.66 0 0 0-.6-.03A5.55 5.55 0 1 0 15.55 13.8V8.5a7.45 7.45 0 0 0 4.45 1.45V6.78a4.28 4.28 0 0 1-3.4-0.96z" />
+      <path d="M16.7 2h-3.04v12.36a2.2 2.2 0 1 1-1.86-2.17V9.1a5.27 5.27 0 1 0 4.62 5.22V8.2a6.7 6.7 0 0 0 3.9 1.25V6.4a3.86 3.86 0 0 1-2.62-1.05A3.86 3.86 0 0 1 16.7 2.5z" />
     </svg>
   )
 }
 
-export function InstagramIcon({ size = 12 }: { size?: number }) {
+export function InstagramIcon({ size = 14 }: { size?: number }) {
   return (
     <svg
       width={size}
@@ -14,14 +14,14 @@ export function InstagramIcon({ size = 12 }: { size?: number }) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={2}
+      strokeWidth={2.2}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
     >
-      <rect x="2" y="2" width="20" height="20" rx="5.5" />
-      <circle cx="12" cy="12" r="4.2" />
-      <circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none" />
+      <rect x="2.5" y="2.5" width="19" height="19" rx="6" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.6" cy="6.4" r="1.15" fill="currentColor" stroke="none" />
     </svg>
   )
 }
