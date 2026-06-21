@@ -197,7 +197,7 @@ export const feed: FeedItem[] = [
 export const sampleShares: Omit<ReelItem, 'id' | 'meta' | 'status' | 'topic' | 'skin'>[] = [
   {
     kind: 'reel',
-    source: 'instagram',
+    source: 'tiktok',
     handle: '@macro.daily',
     caption: 'The yen carry trade is unwinding — what it means for risk assets',
     poster: ['#3b78ec', '#0e2150'],
