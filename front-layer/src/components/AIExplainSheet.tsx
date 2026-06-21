@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { X, ArrowUp, Bell, LineChart } from 'lucide-react'
 import { Sheet } from './Sheet'
 import { AIOrb } from './AIOrb'
@@ -24,6 +24,40 @@ export function AIExplainSheet({ payload, onClose, onAsk, onConfirm, onResearch 
   const [tf, setTf] = useState<string>('24H')
   const ticker = payload?.related?.[0]?.ticker ?? 'GLD'
   const chart = useMemo(() => buildChart(ticker, 44, tf), [ticker, tf])
+
+  // Follow-up Q&A — calls the backend assistant (slow is fine).
+  const [question, setQuestion] = useState('')
+  const [answer, setAnswer] = useState<string | null>(null)
+  const [asking, setAsking] = useState(false)
+
+  // Reset the thread whenever a new item is opened.
+  useEffect(() => {
+    setQuestion('')
+    setAnswer(null)
+    setAsking(false)
+  }, [payload?.contextLabel])
+
+  const submitFollowUp = async () => {
+    const q = question.trim()
+    if (!q || asking) return
+    setAsking(true)
+    setAnswer(null)
+    try {
+      const res = await fetch('/api/v1/signals/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ question: q, context: payload?.contextLabel ?? '' }),
+      })
+      const data = await res.json()
+      setAnswer(data.answer ?? 'No answer came back — your RM will follow up.')
+    } catch {
+      setAnswer('Could not reach the assistant just now — your RM will follow up.')
+    } finally {
+      setAsking(false)
+      setQuestion('')
+    }
+  }
 
   const suggested = suggestedFor(payload?.assessment ?? 'neutral')
 
@@ -145,13 +179,45 @@ export function AIExplainSheet({ payload, onClose, onAsk, onConfirm, onResearch 
             </div>
           </div>
 
+          {/* follow-up answer */}
+          {(asking || answer) && (
+            <div className="mt-3 rounded-2xl border border-line bg-paper px-3.5 py-3">
+              <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-ink-faint">
+                <AIOrb size={14} float={false} /> Signal AI
+              </div>
+              {asking ? (
+                <div className="flex items-center gap-1.5 py-1">
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className="h-1.5 w-1.5 rounded-full bg-navy-500"
+                      style={{ animation: `eq 1s ease-in-out ${i * 0.15}s infinite` }}
+                    />
+                  ))}
+                  <span className="ml-1 text-[13px] text-ink-faint">Thinking…</span>
+                </div>
+              ) : (
+                <p className="text-[14px] leading-relaxed text-ink">{answer}</p>
+              )}
+            </div>
+          )}
+
           {/* follow-up */}
           <div className="mt-3 flex items-center gap-2 rounded-full border border-line bg-paper px-2 py-1.5">
             <input
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && submitFollowUp()}
               placeholder="Follow up…"
-              className="flex-1 bg-transparent px-3 text-[14px] text-ink placeholder:text-ink-faint focus:outline-none"
+              disabled={asking}
+              className="flex-1 bg-transparent px-3 text-[14px] text-ink placeholder:text-ink-faint focus:outline-none disabled:opacity-60"
             />
-            <button className="flex h-9 w-9 items-center justify-center rounded-full bg-navy-900 text-white">
+            <button
+              onClick={submitFollowUp}
+              disabled={asking || !question.trim()}
+              aria-label="Send follow-up"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-navy-900 text-white transition-opacity disabled:opacity-40"
+            >
               <ArrowUp size={17} strokeWidth={2.4} />
             </button>
           </div>

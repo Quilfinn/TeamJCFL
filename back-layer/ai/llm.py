@@ -17,6 +17,28 @@ def call_llm(system: str, user: str) -> str:
         raise
 
 
+def ask_llm(system: str, user: str) -> str:
+    """Direct Q&A for the follow-up box. Always uses a real model (quality over
+    speed, regardless of LLM_PROVIDER): tries Groq, then local Ollama with a
+    generous timeout so the answer comes back no matter how long it takes."""
+    try:
+        return _call('groq', system, user)
+    except Exception:
+        pass
+    import requests as req
+    base = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434')
+    model = os.getenv('OLLAMA_MODEL', 'mistral')
+    r = req.post(f'{base}/api/chat', json={
+        'model': model,
+        'messages': [
+            {'role': 'system', 'content': system},
+            {'role': 'user',   'content': user},
+        ],
+        'stream': False,
+    }, timeout=180)
+    return r.json()['message']['content']
+
+
 def _call(provider: str, system: str, user: str) -> str:
     if provider == 'groq':
         from groq import Groq
