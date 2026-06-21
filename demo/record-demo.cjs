@@ -51,10 +51,26 @@ async function scrollTo(page, ratio) {
     await explain.click()
     await page.waitForTimeout(1300); await shot('03-orbit-typing.png')
     await page.waitForTimeout(5200); await shot('04-orbit-done.png')
-    await page.waitForTimeout(1500) // hold on the final frame
+    await page.waitForTimeout(1200)
   } catch (e) {
     console.log('Explain step skipped:', e.message)
     await page.waitForTimeout(2000)
+  }
+
+  // 5 — send it to Clara: Orbit "Clara" → ForwardSheet → Send
+  try {
+    const clara = page.locator('button:has-text("Clara")').first()
+    await clara.waitFor({ state: 'visible', timeout: 4000 })
+    await clara.click()
+    await page.waitForTimeout(1400); await shot('05-send-clara.png') // ForwardSheet
+    const send = page.locator('button:has-text("Send to Clara")').first()
+    await send.waitFor({ state: 'visible', timeout: 4000 })
+    await send.click()
+    await page.waitForTimeout(3000); await shot('06-clara-reply.png') // Clara/Orbit reply
+    await page.waitForTimeout(1800) // hold on the final frame
+  } catch (e) {
+    console.log('Clara step skipped:', e.message)
+    await page.waitForTimeout(1500)
   }
 
   await context.close() // flushes the video to disk
