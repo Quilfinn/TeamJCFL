@@ -18,15 +18,6 @@ export function RecordingDrawer({
   return (
     <Sheet open={open} onClose={processing ? () => {} : onCancel} variant="light">
       <div className="relative px-5 pt-3 pb-9">
-        {/* soft blue wash at the top of the sheet */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-40"
-          style={{
-            background:
-              'radial-gradient(90% 100% at 50% 0%, rgba(31,84,199,0.14), rgba(31,84,199,0) 70%)',
-          }}
-        />
-
         <div className="relative text-center">
           <div className="inline-flex items-center gap-2 text-[16px] font-semibold text-ink">
             {!processing && <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--color-rose)]" />}
