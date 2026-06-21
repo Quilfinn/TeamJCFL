@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { X, ArrowUp, Bell, LineChart } from 'lucide-react'
 import { Sheet } from './Sheet'
 import { AIOrb } from './AIOrb'
@@ -24,6 +24,43 @@ export function AIExplainSheet({ payload, onClose, onAsk, onConfirm, onResearch 
   const [tf, setTf] = useState<string>('24H')
   const ticker = payload?.related?.[0]?.ticker ?? 'GLD'
   const chart = useMemo(() => buildChart(ticker, 44, tf), [ticker, tf])
+
+  // Orbit thinks → types the message → (beat) → pulls up the graph
+  const [phase, setPhase] = useState<'thinking' | 'typing' | 'typed' | 'done'>('thinking')
+  const [typed, setTyped] = useState('')
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  useEffect(() => {
+    timers.current.forEach(clearTimeout)
+    timers.current = []
+    if (!payload) return
+    const full = payload.brief
+    setTyped('')
+    setTf('24H')
+    setPhase('thinking')
+    let i = 0
+    const type = () => {
+      i += 2
+      if (i >= full.length) {
+        setTyped(full)
+        setPhase('typed') // message done — hold a beat before the graph
+        timers.current.push(setTimeout(() => setPhase('done'), 620))
+        return
+      }
+      setTyped(full.slice(0, i))
+      timers.current.push(setTimeout(type, 16))
+    }
+    timers.current.push(
+      setTimeout(() => {
+        setPhase('typing')
+        type()
+      }, 620),
+    )
+    return () => {
+      timers.current.forEach(clearTimeout)
+      timers.current = []
+    }
+  }, [payload])
 
   const suggested = suggestedFor(payload?.assessment ?? 'neutral')
 
@@ -78,17 +115,39 @@ export function AIExplainSheet({ payload, onClose, onAsk, onConfirm, onResearch 
                 className="max-w-[86%] rounded-[20px] rounded-bl-md px-3.5 py-2.5 text-[13.5px] leading-snug text-white"
                 style={{ background: 'linear-gradient(155deg, #5f7df8, #4661e8)' }}
               >
-                {payload.brief}
+                {phase === 'thinking' ? (
+                  <span className="flex items-center gap-1 py-0.5" aria-label="Orbit is thinking">
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        className="inline-block h-1.5 w-1.5 rounded-full bg-white"
+                        style={{ animation: `typingBounce 1.1s ease-in-out ${i * 0.16}s infinite` }}
+                      />
+                    ))}
+                  </span>
+                ) : (
+                  <>
+                    {typed}
+                    {phase === 'typing' && (
+                      <span
+                        className="ml-0.5 inline-block h-[1.05em] w-[2px] translate-y-[2px] rounded-full bg-white align-middle"
+                        style={{ animation: 'caretBlink 0.9s step-end infinite' }}
+                      />
+                    )}
+                  </>
+                )}
               </div>
             </div>
           </div>
 
-          {/* action card */}
+          {/* action card — appears once Orbit finishes typing */}
+          {phase === 'done' && (
           <div
             className="relative mt-3 overflow-hidden rounded-[26px] p-4 text-white"
             style={{
               background: 'linear-gradient(160deg, #6e7cff 0%, #4f63ed 52%, #3f54df 100%)',
               boxShadow: '0 20px 40px -18px rgba(63,84,223,0.6)',
+              animation: 'popUp 0.4s cubic-bezier(0.22,1,0.36,1) both',
             }}
           >
             <div className="grain-overlay" style={{ opacity: 0.07 }} aria-hidden />
@@ -144,6 +203,7 @@ export function AIExplainSheet({ payload, onClose, onAsk, onConfirm, onResearch 
               </div>
             </div>
           </div>
+          )}
 
           {/* follow-up */}
           <div className="mt-3 flex items-center gap-2 rounded-full border border-line bg-paper px-2 py-1.5">
