@@ -18,6 +18,7 @@ import { ResearchSheet } from './components/ResearchSheet'
 import { ForwardSheet } from './components/ForwardSheet'
 import { AdvisorPage } from './components/AdvisorPage'
 import { IntroSplash } from './components/IntroSplash'
+import { ShareIntake } from './components/ShareIntake'
 import { RMMessageCard } from './components/RMMessageCard'
 import { Toast } from './components/Toast'
 import { TikTokIcon } from './components/BrandIcons'
@@ -108,10 +109,22 @@ export default function App() {
   const seenSent = useRef<Set<string>>(new Set())
   const primed = useRef(false)
   const shareCount = useRef(0)
+  // Reel mid-arrival from TikTok/Instagram (drives the share-intake overlay).
+  const [intake, setIntake] = useState<ReelItem | null>(null)
 
   useEffect(() => {
     const t = setTimeout(() => setIntro(false), 2550)
     return () => clearTimeout(t)
+  }, [])
+
+  // Demo one-take: open with ?from=tiktok (or ?share) and the reel auto-arrives
+  // right after the intro — films the whole "shared into the app" opening hands-free.
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search)
+    if (!p.has('from') && !p.has('share')) return
+    const t = setTimeout(() => shareReel(), 3000)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Sign Leo in once so his signals carry the auth cookie to the backend.
@@ -319,7 +332,8 @@ export default function App() {
 
   // Leo shares a reel from TikTok/Instagram: it lands on his stack with a
   // recommendation, and fires straight to Anna's RM Radar dashboard.
-  const shareReel = async () => {
+  // Step 1 — a reel arrives from TikTok: play the intake hand-off overlay.
+  const shareReel = () => {
     const sample = sampleShares[shareCount.current % sampleShares.length]
     shareCount.current += 1
     const id = `r-${seq++}`
@@ -331,21 +345,28 @@ export default function App() {
       topic: '',
       skin: MEMO_SKINS[seq % MEMO_SKINS.length],
     }
+    setIntake(reel)
+  }
+
+  // Step 2 — overlay done: drop the reel on the stack and fire the AI pipeline,
+  // which surfaces it on Anna's RM Radar dashboard.
+  const commitShare = async (reel: ReelItem) => {
+    setIntake(null)
     setFeed((f) => [reel, ...f])
-    setFreshId(id)
+    setFreshId(reel.id)
     setTimeout(() => setFreshId(null), 800)
     showToast('Signal AI is reading your reel…')
     try {
       const res = await fetch(`${API}/signals/reel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caption: sample.caption, client_uuid: CLIENT_UUID }),
+        body: JSON.stringify({ caption: reel.caption, client_uuid: CLIENT_UUID }),
         credentials: 'include',
       })
       if (res.ok) {
         const data = await res.json()
         const sig = signalFromUrgency(data.rm_brief?.urgency, data.client_card?.headline)
-        setFeed((f) => f.map((x) => (x.id === id ? ({ ...x, signal: sig } as FeedItem) : x)))
+        setFeed((f) => f.map((x) => (x.id === reel.id ? ({ ...x, signal: sig } as FeedItem) : x)))
         showToast('Shared with Anna ✓ — she’s on it')
       } else {
         showToast('Shared with Anna')
@@ -438,6 +459,7 @@ export default function App() {
           <ForwardSheet context={askContext} onClose={() => setAskContext(null)} onSent={askSent} />
           <Toast message={toast} />
           {intro && <IntroSplash name={CLIENT.name} />}
+          <ShareIntake reel={intake} onDone={commitShare} />
         </>
       }
     >

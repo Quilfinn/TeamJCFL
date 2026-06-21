@@ -297,3 +297,24 @@ body {
     opacity: 0.95;
   }
 }
+
+/* Share-intake: "a reel just arrived from TikTok" hand-off */
+@keyframes shareFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes shareLeave {
+  0%   { transform: translateX(0) scale(1); opacity: 1; }
+  55%  { transform: translateX(0) scale(0.96); opacity: 1; }
+  100% { transform: translateX(8px) scale(0.9); opacity: 0.45; }
+}
+@keyframes shareArrive {
+  0%   { transform: scale(0.6); opacity: 0; }
+  55%  { transform: scale(0.6); opacity: 0.2; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes shareSpark {
+  0%   { transform: translateX(-2.5rem); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translateX(4rem); opacity: 0; }
+}
