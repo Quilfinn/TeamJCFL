@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { TikTokIcon, InstagramIcon } from './BrandIcons'
 import { AIOrb } from './AIOrb'
 import type { ReelItem } from '../data/feed'
@@ -14,11 +14,17 @@ interface Props {
  * Sells the opening beat of the demo: scrolling TikTok → shared into the app.
  */
 export function ShareIntake({ reel, onDone }: Props) {
+  // Keep onDone in a ref so background re-renders (polling) can't reset the timer.
+  const onDoneRef = useRef(onDone)
+  onDoneRef.current = onDone
+
   useEffect(() => {
     if (!reel) return
-    const t = setTimeout(() => onDone(reel), 1850)
+    const r = reel
+    const t = setTimeout(() => onDoneRef.current(r), 1850)
     return () => clearTimeout(t)
-  }, [reel, onDone])
+    // run exactly once per reel arrival
+  }, [reel?.id])
 
   if (!reel) return null
   const Source = reel.source === 'tiktok' ? TikTokIcon : InstagramIcon
